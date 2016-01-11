@@ -32,13 +32,19 @@ import com.sinnerschrader.aem.react.exception.TechnicalException;
 import com.sinnerschrader.aem.react.loader.ScriptCollectionLoader;
 import com.sinnerschrader.aem.react.loader.ScriptLoader;
 
-@Component(label = "HLAG-Web ReactJs Script Engine Factory", metatype = true)
+@Component(label = "ReactJs Script Engine Factory", metatype = true)
 @Service(ScriptEngineFactory.class)
-@Properties({ @Property(name = "service.description", value = "Reactjs Templating Engine"),//
-    @Property(name = "compatible.javax.script.name", value = "jsx"),// TODO also use it for extension and other props.
-    @Property(name = ReactScriptEngineFactory.PROPERTY_SCRIPTS_PATHS, label="the jcr paths to the scripts libraries"),//
-    @Property(name = ReactScriptEngineFactory.PROPERTY_POOL_TOTAL_SIZE, label="total javascript engine pool size", longValue = 20),//
-    @Property(name = ReactScriptEngineFactory.PROPERTY_SCRIPTS_RELOAD, label="reload library scripts before each rendering", boolValue = true),//
+@Properties({ @Property(name = "service.description", value = "Reactjs Templating Engine"), //
+    @Property(name = "compatible.javax.script.name", value = "jsx"), // TODO
+                                                                     // also use
+                                                                     // it for
+                                                                     // extension
+                                                                     // and
+                                                                     // other
+                                                                     // props.
+    @Property(name = ReactScriptEngineFactory.PROPERTY_SCRIPTS_PATHS, label = "the jcr paths to the scripts libraries"), //
+    @Property(name = ReactScriptEngineFactory.PROPERTY_POOL_TOTAL_SIZE, label = "total javascript engine pool size", longValue = 20), //
+    @Property(name = ReactScriptEngineFactory.PROPERTY_SCRIPTS_RELOAD, label = "reload library scripts before each rendering", boolValue = true),//
 })
 public class ReactScriptEngineFactory extends AbstractScriptEngineFactory {
 
@@ -54,6 +60,9 @@ public class ReactScriptEngineFactory extends AbstractScriptEngineFactory {
   private DynamicClassLoaderManager dynamicClassLoaderManager;
 
   @Reference
+  private OsgiServiceFinder finder;
+
+  @Reference
   private ScriptLoader scriptLoader;
 
   private static final String NASHORN_POLYFILL_JS = "nashorn-polyfill.js";
@@ -61,7 +70,6 @@ public class ReactScriptEngineFactory extends AbstractScriptEngineFactory {
   private ClassLoader dynamicClassLoader;
 
   private ReactScriptEngine engine;
-
 
   protected ScriptCollectionLoader createLoader(final String[] scriptResources) {
     // we need to add the nashorn polyfill for console, global and AemGlobal
@@ -76,7 +84,7 @@ public class ReactScriptEngineFactory extends AbstractScriptEngineFactory {
 
       @Override
       public Iterator<Reader> iterator() {
-        List<Reader> readers = new ArrayList<Reader>();
+        List<Reader> readers = new ArrayList();
         try {
           readers.add(new InputStreamReader(polyFillUrl.openStream(), "UTF-8"));
         } catch (IOException e) {
@@ -116,12 +124,11 @@ public class ReactScriptEngineFactory extends AbstractScriptEngineFactory {
   public void initialize(final ComponentContext context) {
     String[] scriptResources = PropertiesUtil.toStringArray(context.getProperties().get(PROPERTY_SCRIPTS_PATHS), new String[0]);
     int poolTotalSize = PropertiesUtil.toInteger(context.getProperties().get(PROPERTY_POOL_TOTAL_SIZE), 20);
-    JavacriptEnginePoolFactory javacriptEnginePoolFactory = new JavacriptEnginePoolFactory(createLoader(scriptResources));
+    JavacriptEnginePoolFactory javacriptEnginePoolFactory = new JavacriptEnginePoolFactory(createLoader(scriptResources), null);
     ObjectPool<JavascriptEngine> pool = createPool(poolTotalSize, javacriptEnginePoolFactory);
-    this.engine = new ReactScriptEngine(this, pool, isReloadScripts(context));
+    this.engine = new ReactScriptEngine(this, pool, isReloadScripts(context), finder);
   }
-  
-  
+
   @Modified
   public void reconfigure(final ComponentContext context) {
     stop();

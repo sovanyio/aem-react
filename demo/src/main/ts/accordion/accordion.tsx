@@ -1,13 +1,11 @@
 import * as React from "react";
 import * as resource from "aem-react-js/component/ResourceComponent";
 import AccordionElement from "./accordion-element";
-import * as Container from "aem-react-js/container";
 import {ResourceInclude} from "aem-react-js/include";
-import {ResourceUtils} from "aem-react-js/ResourceUtils";
+import ResourceUtils from "aem-react-js/ResourceUtils";
 import EditMarker from "aem-react-js/component/EditMarker";
 
-export default class Accordion extends Container.StackContainer {
-
+export default class Accordion extends resource.ResourceComponent<any, any, any> {
 
     constructor(props: resource.ResourceProps<resource.Resource>) {
         super(props);
@@ -35,10 +33,10 @@ export default class Accordion extends Container.StackContainer {
         let children: any = ResourceUtils.getChildren(content);
         Object.keys(children).forEach((node: string, childIdx: number) => {
             toggles.push(<AccordionElement path={node}
-                                 groupId={this.props.path}
-                                 onChange={function():void {this.onChange(childIdx);}.bind(this)}
-                                 key={node}
-                                 active={ activeIndex === childIdx }
+                                           groupId={this.props.path}
+                                           onChange={function():void {this.onChange(childIdx);}.bind(this)}
+                                           key={node}
+                                           active={ activeIndex === childIdx }
             ></AccordionElement>);
         }, this);
 
@@ -46,12 +44,16 @@ export default class Accordion extends Container.StackContainer {
         let newZone: React.ReactElement<any> = null;
         if (this.isWcmEditable()) {
             let resourceType = this.getResourceType() + "/new";
-            newZone = <ResourceInclude element="div" hidden={true} path={ this.props.path + "/*" }
-                                      resourceType={resourceType}></ResourceInclude>;
+            newZone = <ResourceInclude element="div" hidden={true} path="*"
+                                       resourceType={resourceType}></ResourceInclude>;
         }
         return (
             <div>
+<<<<<<< HEAD
                 <EditMarker  label="Accordion"></EditMarker>
+=======
+                <EditMarker label="Accordion"/>
+>>>>>>> 5bd2842... removed redux
                 { toggles }
                 { newZone }
             </div>

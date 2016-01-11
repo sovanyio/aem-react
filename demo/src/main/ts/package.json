@@ -19,13 +19,26 @@
     "type": "git",
     "url": "https://github.com/sinnerschrader/aem-react.git"
   },
-  "private": true,
   "dependencies": {
+    "babel-polyfill": "^6.3.14",
     "classlist-polyfill": "^1.0.2",
+    "deep-equal": "^1.0.1",
+    "history": "^1.17.0",
+    "invariant": "^2.2.0",
     "node-libs-browser": "^0.5.3",
     "process": "^0.11.1",
+<<<<<<< HEAD
     "react": "^0.13.3",
     "aem-react-js":"^0.2.1"
+=======
+    "query-string": "^3.0.0",
+    "aem-react-js": "file:../../../../../aem-react-js/aem-react-js-0.2.0.tgz ",
+    "react-router": "^1.0.3",
+    "react": "^0.14.7",
+    "react-dom": "^0.14.7",
+    "strict-uri-encode": "^1.1.0",
+    "warning": "^2.1.0"
+>>>>>>> 09b2451... initial
   },
   "devDependencies": {
     "eslint": "^1.6.0",
@@ -33,10 +46,10 @@
     "mocha": "^2.3.4",
     "npm": "^2.13.5",
     "power-assert": "^1.2.0",
-    "ts-loader": "^0.5.5",
+    "ts-loader": "^0.7.2",
     "tsd": "^0.6.5",
     "tslint": "^2.5.1",
-    "typescript": "1.6.2",
+    "typescript": "^1.8.10",
     "webdav-sync": "^0.4.4",
     "webpack": "^1.12.2"
   }

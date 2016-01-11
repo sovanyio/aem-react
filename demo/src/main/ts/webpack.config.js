@@ -1,6 +1,7 @@
 /*eslint no-console: 0*/
 
 var path = require('path');
+var fs = require('fs');
 var webpack = require('webpack');
 
 var jcrPath = path.join(__dirname, '..', 'content', 'jcr_root', 'etc', 'designs', 'react-demo', 'js', 'react-demo');
@@ -29,27 +30,36 @@ if (!serverJs) {
     entries.push('./server.tsx');
 }
 
+var nodeModules = [path.join(__dirname, 'node_modules'),path.join(__dirname, 'node_modules','react','node_modules','fbjs')];
+/*
+fs.readdirSync('./node_modules')
+    .filter(function (x) {
+        return ['.bin'].indexOf(x) === -1;
+    })
+    .forEach(function (mod) {
+        nodeModules.push(path.join(__dirname, 'node_modules', mod));
+    });
+    */
+
+
 
 var config = {
     entry: entries,
-    debug:true,
+    debug: true,
     output: {
         path: jcrPath,
         filename: targetFileName
     },
-    resolveLoader: {
-        root: path.join(__dirname, 'node_modules')
-    },
     resolve: {
-        root: __dirname,
-        extensions: ['', '.ts', '.tsx', '.webpack.js', '.web.js', '.js'],
-        modulesDirectories: [path.join(__dirname, 'node_modules')]
+        extensions: ['', '.tsx', '.webpack.js', '.web.js', '.js']
+
     },
     module: {
         loaders: [
             {
                 test: /\.(ts|tsx)$/,
                 loader: 'ts-loader'
+
             }
         ]
     },

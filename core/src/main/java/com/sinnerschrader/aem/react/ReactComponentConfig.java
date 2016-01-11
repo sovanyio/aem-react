@@ -29,6 +29,14 @@ public class ReactComponentConfig {
     return depth;
   }
 
+  @JsonProperty
+  private String loaderClass;
+
+  
+  public String getLoaderClass() {
+    return loaderClass;
+  }
+
   /**
    *
    * @return name of the react component

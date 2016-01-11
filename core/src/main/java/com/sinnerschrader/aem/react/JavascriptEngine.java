@@ -4,9 +4,11 @@ import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
 import java.util.Iterator;
+import java.util.Map;
 
 import javax.script.Bindings;
 import javax.script.Invocable;
+import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
@@ -14,6 +16,7 @@ import javax.script.ScriptException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sinnerschrader.aem.react.ReactScriptEngine.RenderResult;
 import com.sinnerschrader.aem.react.exception.TechnicalException;
 import com.sinnerschrader.aem.react.loader.ScriptCollectionLoader;
 
@@ -95,22 +98,29 @@ public class JavascriptEngine {
    *
    * @param loader
    */
-  public void initialize(ScriptCollectionLoader loader) {
+  public void initialize(ScriptCollectionLoader loader, Object sling) {
     ScriptEngineManager scriptEngineManager = new ScriptEngineManager(null);
     engine = scriptEngineManager.getEngineByName("nashorn");
     engine.getContext().setErrorWriter(new Print());
     engine.getContext().setWriter(new Print());
     engine.put("console", new Console());
+    engine.put("Sling", sling);
     this.loader = loader;
     updateJavascriptLibrary();
   }
 
   private void updateJavascriptLibrary() {
 
+    try {
+      engine.eval("if (typeof global!=='undefined') delete global._babelPolyfill");
+    } catch (ScriptException e) {
+      throw new TechnicalException("cannot eval library script", e);
+    }
     Iterator<Reader> iterator = loader.iterator();
     while (iterator.hasNext()) {
       try {
-        engine.eval(iterator.next());
+        Reader next = iterator.next();
+        engine.eval(next);
       } catch (ScriptException e) {
         throw new TechnicalException("cannot eval library script", e);
       }
@@ -125,7 +135,7 @@ public class JavascriptEngine {
    * <code>AemGlobal.renderReactComponent(component,json) </code>
    * </pre>
    *
-   * in the javascript context.
+   * </code> in the javascript context.
    *
    * @param component
    *          Name of the react component
@@ -133,14 +143,20 @@ public class JavascriptEngine {
    *          the props of the react component
    * @return the rendered html
    */
-  public String render(String component, String json) {
+  public RenderResult render(String path, String component, String json, Cqx cqx) {
 
     Invocable invocable = ((Invocable) engine);
     try {
+      engine.getBindings(ScriptContext.ENGINE_SCOPE).put("Cqx", cqx);
       Object JSON = engine.get("JSON");
       Object props = invocable.invokeMethod(JSON, "parse", json);
       Object AemGlobal = engine.get("AemGlobal");
-      return (String) invocable.invokeMethod(AemGlobal, "renderReactComponent", component, props);
+      Object value = invocable.invokeMethod(AemGlobal, "renderReactComponent", path, component, props);
+
+      RenderResult result = new RenderResult();
+      result.html = (String) ((Map<String, Object>) value).get("html");
+      result.props = ((Map<String, Object>) value).get("state").toString();
+      return result;
     } catch (NoSuchMethodException | ScriptException e) {
       throw new TechnicalException("cannot render react on server", e);
     }

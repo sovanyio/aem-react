@@ -36,6 +36,7 @@ import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.WCMMode;
 import com.day.cq.wcm.api.components.ComponentContext;
 import com.day.cq.wcm.api.components.EditContext;
@@ -61,8 +62,15 @@ public class ReactScriptEngine extends AbstractSlingScriptEngine {
   private ObjectPool<JavascriptEngine> enginePool;
   private boolean reloadScripts;
   private ObjectMapper mapper;
+  private OsgiServiceFinder finder;
 
-  protected ReactScriptEngine(ScriptEngineFactory scriptEngineFactory, ObjectPool<JavascriptEngine> enginePool, boolean reloadScripts) {
+  public static class RenderResult {
+    public String html;
+    public String props;
+  }
+
+  protected ReactScriptEngine(ScriptEngineFactory scriptEngineFactory, ObjectPool<JavascriptEngine> enginePool, boolean reloadScripts,
+      OsgiServiceFinder finder) {
     super(scriptEngineFactory);
 
     this.mapper = new ObjectMapper();
@@ -70,6 +78,7 @@ public class ReactScriptEngine extends AbstractSlingScriptEngine {
 
     this.enginePool = enginePool;
     this.reloadScripts = reloadScripts;
+    this.finder = finder;
 
   }
 
@@ -82,6 +91,8 @@ public class ReactScriptEngine extends AbstractSlingScriptEngine {
 
       Bindings bindings = context.getBindings(ScriptContext.ENGINE_SCOPE);
       SlingHttpServletRequest request = (SlingHttpServletRequest) bindings.get(SlingBindings.REQUEST);
+      SlingHttpServletResponse response = (SlingHttpServletResponse) bindings.get(SlingBindings.RESPONSE);
+      boolean renderAsJson = Arrays.asList(request.getRequestPathInfo().getSelectors()).indexOf("json") >= 0;
       Resource resource = request.getResource();
 
       boolean dialog = Arrays.asList(request.getRequestPathInfo().getSelectors()).contains("dialog");
@@ -92,11 +103,10 @@ public class ReactScriptEngine extends AbstractSlingScriptEngine {
 
       if (dialog) {
         context.getWriter().write("");
-      } else if (isPartialRequest(resource, request) && !rootPath.equals(resource.getPath())) {
+      } else if (!renderAsJson && isPartialRequest(resource, request) && !rootPath.equals(resource.getPath())) {
         // This is a react child component. The page needs to be rerendered
         // completely. In the future we might ask the parent to reload its
         // content via ajax.
-
         String script = "<script>AemGlobal.componentManager.reloadRootInCq('" + resource.getPath() + "')</script>";
         context.getWriter().write(script);
       } else {
@@ -107,13 +117,34 @@ public class ReactScriptEngine extends AbstractSlingScriptEngine {
 
         String renderedHtml;
         boolean serverRendering = !SERVER_RENDERING_DISABLED.equals(request.getParameter(SERVER_RENDERING_PARAM));
+        String json = reactProps.toString();
         if (serverRendering) {
-          String reactMarkup = renderReactMarkup(reactProps, component);
-          renderedHtml = postRender(reactMarkup, context);
+          RenderResult result = renderReactMarkup(resource.getPath(), reactProps, component, context);
+          renderedHtml = postRender(result.html, context);
+          json = result.props;
+        } else if (renderAsJson) {
+          // dev mode: return cache with just the current resource.
+          JSONObject cache = new JSONObject();
+          JSONObject resources = new JSONObject();
+          JSONObject resourceEntry = new JSONObject();
+          resourceEntry.put("depth", config.getDepth());
+          resourceEntry.put("data", JsonObjectCreator.create(resource, -1));
+          resources.put(resource.getPath(), resourceEntry);
+          cache.put("resources", resources);
+          json = cache.toString();
+          renderedHtml = "";
         } else {
           renderedHtml = "";
         }
-        String allHtml = wrapHtml(resource.getPath(), reactProps, component, renderedHtml, serverRendering);
+
+        String allHtml;
+        if (renderAsJson) {
+          allHtml = json;
+          response.setContentType("application/json");
+        } else {
+          allHtml = wrapHtml(resource.getPath(), reactProps, component, renderedHtml, serverRendering, json);
+
+        }
 
         context.getWriter().write(allHtml);
       }
@@ -155,7 +186,13 @@ public class ReactScriptEngine extends AbstractSlingScriptEngine {
    * @param serverRendering
    * @return
    */
-  private String wrapHtml(String path, JSONObject reactProps, String component, String renderedHtml, boolean serverRendering) {
+  private String wrapHtml(String path, JSONObject reactProps, String component, String renderedHtml, boolean serverRendering, String cache) {
+    try {
+      reactProps.put("cache", new JSONObject(cache));
+    } catch (JSONException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
     String jsonProps = StringEscapeUtils.escapeHtml4(reactProps.toString());
     String allHtml = "<div data-react-server=\"" + String.valueOf(serverRendering) + "\" data-react=\"app\" data-react-id=\"" + path + "_component\">"
         + renderedHtml + "</div>" + "<textarea id=\"" + path + "_component\" style=\"display:none;\">" + jsonProps + "</textarea>";
@@ -185,6 +222,25 @@ public class ReactScriptEngine extends AbstractSlingScriptEngine {
     }
   }
 
+  private Resource getPage(Resource resource) {
+    Page page = resource.adaptTo(Page.class);
+    if (page != null) {
+      return resource;
+    } else {
+      return getPage(resource.getParent());
+    }
+  }
+
+  private Cqx createCqx(ScriptContext ctx) {
+    SlingHttpServletRequest request = (SlingHttpServletRequest) ctx.getBindings(ScriptContext.ENGINE_SCOPE).get(SlingBindings.REQUEST);
+    Map<String, Object> objects = new HashMap<>();
+
+    String pathInfo = getPage(request.getResource()).adaptTo(Page.class).getPath();
+    pathInfo += ".html";
+    objects.put("path", pathInfo);
+    return new Cqx(objects, new Sling(ctx), finder);
+  }
+
   /**
    * render the react markup
    *
@@ -194,7 +250,7 @@ public class ReactScriptEngine extends AbstractSlingScriptEngine {
    *          component name
    * @return
    */
-  private String renderReactMarkup(JSONObject reactProps, String component) {
+  private RenderResult renderReactMarkup(String path, JSONObject reactProps, String component, ScriptContext context) {
     JavascriptEngine javascriptEngine;
     try {
       javascriptEngine = enginePool.borrowObject();
@@ -202,9 +258,11 @@ public class ReactScriptEngine extends AbstractSlingScriptEngine {
         if (reloadScripts) {
           javascriptEngine.reloadScripts();
         }
-        return javascriptEngine.render(component, reactProps.toString());
+        return javascriptEngine.render(path, component, reactProps.toString(), createCqx(context));
       } finally {
+
         enginePool.returnObject(javascriptEngine);
+
       }
     } catch (NoSuchElementException e) {
       throw new TechnicalException("cannot get engine from pool", e);
@@ -233,6 +291,7 @@ public class ReactScriptEngine extends AbstractSlingScriptEngine {
       reactProps.put("component", config.getComponent());
 
       reactProps.put("resourceType", resource.getResourceType());
+
       // TODO remove depth and provide custom service to get the resource as
       // json without spcifying the depth. This makes it possible to privde
       // custom loader.
