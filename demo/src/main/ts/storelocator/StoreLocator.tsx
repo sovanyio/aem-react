@@ -21,8 +21,8 @@ export default class StoreLocator extends ResourceComponent<StoreLocatorResource
         let sling: Sling = this.context.aemContext.container.get("sling");
         let resourceMapping: ResourceMapping = this.context.aemContext.container.get("resourceMapping");
 
-        let resourcePath: string = resourceMapping.resolve(sling.getRequestPath());
-
+        // we need to get the containing page path, otherwise requesting just the storelocator component view http would fail.
+        let resourcePath: string = resourceMapping.resolve(sling.getContainingPagePath());
 
         let depth = !!this.getResource() ? this.getResource().depth || 1 : 1;
         let resultPath = ResourceUtils.findAncestor(resourcePath, depth)
@@ -36,7 +36,7 @@ export default class StoreLocator extends ResourceComponent<StoreLocatorResource
                 <Router history={history}>
                     <Route path={indexPath} component={StoresView} baseResourcePath={resourcePath}>
                         <IndexRoute component={Home}/>
-                        <Route path={pattern} basePath={resourcePath} resourceComponent={resourceComponent} component={ResourceRoute}></Route>
+                        <Route path={pattern} basePath={resourcePath} resourceComponent={resourceComponent} component={ResourceRoute}/>
                     </Route>
                 </Router>
             </div>

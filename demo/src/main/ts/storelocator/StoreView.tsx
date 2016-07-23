@@ -18,7 +18,7 @@ export default class StoreView extends ResourceComponent<StoreDetail, any, any> 
                 <h1>{storeDetail.name}</h1>
                 <p>{storeDetail.description}</p>
                 <ReactParsys path="more"></ReactParsys>
-            </div> 
+            </div>
         );
     }
 }

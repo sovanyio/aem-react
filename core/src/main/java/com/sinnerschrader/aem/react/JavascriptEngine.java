@@ -1,8 +1,8 @@
 package com.sinnerschrader.aem.react;
 
 import java.io.IOException;
-import java.io.Reader;
 import java.io.Writer;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory;
 
 import com.sinnerschrader.aem.react.ReactScriptEngine.RenderResult;
 import com.sinnerschrader.aem.react.exception.TechnicalException;
+import com.sinnerschrader.aem.react.loader.HashedScript;
 import com.sinnerschrader.aem.react.loader.ScriptCollectionLoader;
 
 /**
@@ -30,6 +31,7 @@ import com.sinnerschrader.aem.react.loader.ScriptCollectionLoader;
 public class JavascriptEngine {
   private ScriptCollectionLoader loader;
   private ScriptEngine engine;
+  private Map<String, String> scriptChecksums;
 
   private static final Logger LOGGER = LoggerFactory.getLogger(JavascriptEngine.class);
 
@@ -106,21 +108,27 @@ public class JavascriptEngine {
     engine.put("console", new Console());
     engine.put("Sling", sling);
     this.loader = loader;
+    scriptChecksums = new HashMap<>();
     updateJavascriptLibrary();
   }
 
   private void updateJavascriptLibrary() {
 
     try {
+      // TODO remove babel hack
       engine.eval("if (typeof global!=='undefined') delete global._babelPolyfill");
     } catch (ScriptException e) {
       throw new TechnicalException("cannot eval library script", e);
     }
-    Iterator<Reader> iterator = loader.iterator();
+    Iterator<HashedScript> iterator = loader.iterator();
     while (iterator.hasNext()) {
       try {
-        Reader next = iterator.next();
-        engine.eval(next);
+        HashedScript next = iterator.next();
+        String checksum = scriptChecksums.get(next.getId());
+        if (checksum == null || !checksum.equals(next.getChecksum())) {
+          engine.eval(next.getScript());
+          scriptChecksums.put(next.getId(), next.getChecksum());
+        }
       } catch (ScriptException e) {
         throw new TechnicalException("cannot eval library script", e);
       }
@@ -183,6 +191,7 @@ public class JavascriptEngine {
    */
   public void reloadScripts() {
     updateJavascriptLibrary();
+
   }
 
 }
