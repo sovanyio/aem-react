@@ -14,7 +14,6 @@ export default class StoreView extends ResourceComponent<StoreDetail, any, any> 
         let storeDetail: StoreDetail = this.getResource();
         return (
             <div>
-                <span>Hallo</span>
                 <h1>{storeDetail.name}</h1>
                 <p>{storeDetail.description}</p>
                 <ReactParsys path="more"></ReactParsys>

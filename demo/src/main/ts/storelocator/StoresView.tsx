@@ -12,11 +12,14 @@ export default class StoresView extends AemComponent<any, any> {
         let storeList: React.ReactElement<any>[] = this.renderStoreList();
         return (
             <div>
-                <ul>
-                    {storeList}
-                </ul>
-                <div className="detail">
-                    {this.props.children}
+                <h3>Storelocator</h3>
+                <div style={{display:"flex",flexDirection:"row"}}>
+                    <ul style={{flexBasis: "20%"}}>
+                        {storeList}
+                    </ul>
+                    <div style={{flexGrow: 1}} className="detail">
+                        {this.props.children}
+                    </div>
                 </div>
             </div>
         );

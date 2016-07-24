@@ -31,18 +31,16 @@ export default class StoreLocator extends ResourceComponent<StoreLocatorResource
         let resourceComponent: any = StoreView;
         let indexPath: string = resourceMapping.map(resourcePath);
         let pattern: string = resourceMapping.map(resourcePath + "/(:storeId)");
+
         return (
             <div>
-                <Router history={history}>
-                    <Route path={indexPath} component={StoresView} baseResourcePath={resourcePath}>
-                        <IndexRoute component={Home}/>
-                        <Route path={pattern} basePath={resourcePath} resourceComponent={resourceComponent} component={ResourceRoute}/>
-                    </Route>
-                </Router>
+            <Router history={history}>
+                <Route path={indexPath} component={StoresView} baseResourcePath={resourcePath}>
+                    <IndexRoute component={Home}/>
+                    <Route path={pattern} resourceComponent={resourceComponent} component={ResourceRoute}/>
+                </Route>
+            </Router>
             </div>
         );
     }
 }
-
-
-
