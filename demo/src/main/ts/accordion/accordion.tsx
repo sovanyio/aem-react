@@ -49,11 +49,7 @@ export default class Accordion extends resource.ResourceComponent<any, any, any>
         }
         return (
             <div>
-<<<<<<< HEAD
-                <EditMarker  label="Accordion"></EditMarker>
-=======
                 <EditMarker label="Accordion"/>
->>>>>>> 5bd2842... removed redux
                 { toggles }
                 { newZone }
             </div>

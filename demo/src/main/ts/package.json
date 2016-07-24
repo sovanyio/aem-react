@@ -27,10 +27,6 @@
     "invariant": "^2.2.0",
     "node-libs-browser": "^0.5.3",
     "process": "^0.11.1",
-<<<<<<< HEAD
-    "react": "^0.13.3",
-    "aem-react-js":"^0.2.1"
-=======
     "query-string": "^3.0.0",
     "aem-react-js": "file:../../../../../aem-react-js/aem-react-js-0.2.0.tgz ",
     "react-router": "^1.0.3",
@@ -38,7 +34,6 @@
     "react-dom": "^0.14.7",
     "strict-uri-encode": "^1.1.0",
     "warning": "^2.1.0"
->>>>>>> 09b2451... initial
   },
   "devDependencies": {
     "eslint": "^1.6.0",
