@@ -1,0 +1,6 @@
+target
+.settings
+node_modules
+.idea
+*.versionsBackup
+*.log

@@ -1,0 +1,26 @@
+{
+  "compileOnSave": false,
+  "compilerOptions": {
+    "target": "es3",
+    "sourceMap": true,
+    "module": "commonjs",
+    "jsx": "react",
+    "noImplicitAny": true,
+    "removeComments": true,
+    "preserveConstEnums": false
+  },
+  "files": [
+    "./references.d.ts",
+    "./client.tsx",
+    "./server.tsx",
+    "cityfinder/CityFinder.tsx",
+    "cityfinder/CityListView.tsx",
+    "cityfinder/CityView.tsx",
+    "./vanilla/TextField.tsx",
+    "./text/text.tsx",
+    "./embedded/embedded.tsx",
+    "./accordion/accordion-element.tsx",
+    "./accordion/accordion.tsx",
+    "./componentRegistry.tsx"
+  ]
+}
