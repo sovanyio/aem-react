@@ -26,55 +26,301 @@
             <h1>AEM React</h1>
                 <h2 id="nav_0">1 Introduction</h2>
                 
-                    <p>This is a chapter intro text.</p>
-<p><div class="center-block caption-fix">
-    <img src="diagram.puml" class="center-block img-responsive" alt="title" />
-    <div class="caption">
-        <p >diagram</p>
-    </div>
-</div> </p>
+                    <p>The goal of the AEM React library is to use ReactJs as a templating engine for AEM components.</p>
+<h4>Why React and AEM?</h4><p>React components are ideal to create web applications with complex client-side interactivity. AEM provides a perfect authoring interface for web content.
+This project brings these technologies together, so that you can build highly interactive web pages with a professional authoring tool.</p>
+<h4>Features</h4><ul>
+<li><a href="http://www.2ality.com/2015/08/isomorphic-javascript.html">Universal</a> React rendering</li>
+<li>High performance javascript execution with a pool of Java 8 <a href="https://docs.oracle.com/javase/8/docs/technotes/guides/scripting/nashorn/">nashorn</a> engines.</li>
+<li>Nesting React components in other AEM components and vice versa is supported.</li>
+<li>Converting vanilla react components into AEM components is supported</li>
+<li>SPA based on react router is supported.</li>
+</ul>
+<h4>Artifacts</h4><p>The aem react project consists of the following parts:</p>
+<ul>
+<li>osgi bundle contains the Sling Script Engine to render AEM components in react.</li>
+<li>npm module contains the basic javascript functionality</li>
+<li>maven archetype is a fork of the AEM archetype and adds react support and examples.</li>
+<li>demo content package provides examples for components and SPA.</li>
+</ul>
+<h4>Prerequisites</h4><ul>
+<li><blockquote>
+<p>= Java 8 (Oracle JDK with nashorn engine)</p>
+</blockquote>
+</li>
+<li><blockquote>
+<p>= AEM 6.0</p>
+</blockquote>
+</li>
+</ul>
 
-                    <h3 id="subnav_0_0">1.1 Documentation</h3>
-                    <p>This is the sub chapter &quot;Documentation&quot;</p>
-<p><div class="center-block caption-fix">
-    <img src="image.jpg" class="center-block img-responsive" alt="title" />
-    <div class="caption">
-        <p >image</p>
-    </div>
-</div>.</p>
+                <h2 id="nav_1">2 Getting Started</h2>
+                
+                    <p>In this guide we will use the maven archetype to generate a project structure.
+It already includes some demo content and react components.</p>
+<p><em>Requirements</em></p>
+<ul>
+<li>Adobe Experience Manager 6 or higher</li>
+<li>Apache Maven (3.x should do)</li>
+</ul>
+<p>The example react components are written in Typescript. The node build tools
+are also assuming that you are developing in Typescript. If you want to use another dialect you need to
+tewak the build scripts.</p>
+
+                    <h3 id="subnav_1_0">2.1 Create project</h3>
+                    <p>To quickly get started we will use the maven archetype.</p>
+<ol>
+<li><p>create maven project</p>
+<pre><code class="lang-bash">mvn archetype:generate \
+-<span class="ruby"><span class="hljs-constant">DarchetypeGroupId</span>=com.sinnerschrader.aem.react \
+</span>-<span class="ruby"><span class="hljs-constant">DarchetypeArtifactId</span>=aem-project-archetype \
+</span>-<span class="ruby"><span class="hljs-constant">DarchetypeVersion</span>=<span class="hljs-number">10</span> \</span>
+</code></pre>
+<p>You will then be asked a couple of questions about project name and folder names and so on.</p>
+</li>
+</ol>
+<p><strong>Available properties</strong></p>
 <table class="table table-bordered table-striped">
 <thead>
 <tr>
-<th>this</th>
-<th>is a</th>
-<th>table</th>
+<th>groupId</th>
+<th>Maven GroupId</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>a</td>
-<td>b</td>
-<td>c</td>
+<td> groupId</td>
+<td>Base Maven groupId</td>
 </tr>
 <tr>
-<td>a</td>
-<td>b</td>
-<td>c</td>
+<td> artifactId</td>
+<td>Base Maven ArtifactId</td>
+</tr>
+<tr>
+<td> version</td>
+<td>Version</td>
+</tr>
+<tr>
+<td> package</td>
+<td>Java Source Package</td>
+</tr>
+<tr>
+<td> appsFolderName</td>
+<td>/apps folder name</td>
+</tr>
+<tr>
+<td> artifactName</td>
+<td>Maven Project Name</td>
+</tr>
+<tr>
+<td> componentGroupName</td>
+<td>AEM component group name</td>
+</tr>
+<tr>
+<td> contentFolderName</td>
+<td>/content folder name</td>
+</tr>
+<tr>
+<td> cssId</td>
+<td>prefix used in generated css</td>
+</tr>
+<tr>
+<td> packageGroup</td>
+<td>Content Package Group name</td>
+</tr>
+<tr>
+<td> siteName</td>
+<td>AEM site name</td>
 </tr>
 </tbody>
 </table>
-<pre><code class="lang-javascript"><span class="hljs-keyword">if</span> (x==<span class="hljs-number">1</span>) javascript.format(<span class="hljs-string">"nicely"</span>);
+<ol>
+<li><p>start AEM</p>
+<p>AEM should now be running.</p>
+</li>
+</ol>
+<ol>
+<li><p>install demo</p>
+<pre><code class="lang-bash"><span class="hljs-keyword">mvn </span>install -PautoInstallPackage
 </code></pre>
+</li>
+</ol>
+<p>If your AEM instance is not running on localhost:4503 then you need to add additonal parameter</p>
+<table class="table table-bordered table-striped">
+<thead>
+<tr>
+<th>parameter</th>
+<th>default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>-Daem.port</td>
+<td>4502</td>
+</tr>
+<tr>
+<td>-Daem.host</td>
+<td>localhost</td>
+</tr>
+</tbody>
+</table>
+<ol>
+<li><p>Open browser</p>
+</li>
+<li><p>go to the page /content/${siteName}/en.html</p>
+</li>
+<li>find react components in sidekick: <em>React Panel</em>, <em>React Text</em> and <em>ReactParsys</em></li>
+<li>find components already on the page</li>
+</ol>
+<p><div class="center-block caption-fix">
+    <img src="page_sidekick.png" class="center-block img-responsive" alt="title" />
+    <div class="caption">
+        <p >The page en.html with sidekick</p>
+    </div>
+</div></p>
+<ol>
+<li><p>disable author mode</p>
+<p>Disabled the author mode by appending <code>?wcmmode=disabled</code> to the url.
+Install your <a href="https://chrome.google.com/webstore/detail/react-developer-tools/fmkadmapgofadopljbjfkapdkoienihi">react dev tool</a> in chrome browser. Disable author mode and look at react component tree.</p>
+</li>
+</ol>
+<p><div class="center-block caption-fix">
+    <img src="page_dev_tool.png" class="center-block img-responsive" alt="title" />
+    <div class="caption">
+        <p >The page en.html with react dev tools</p>
+    </div>
+</div></p>
+<p>There are two <em>RootComponents</em> which means two independent react component trees.
+The first contains the <em>Text</em> component.
+The second contains the <em>Panel</em> which is a vanilla react component and therefore wrapped by a <em>TheWrapper</em> component.
+The Panel&#39;s child is a <em>ReactParsys</em> which contains another <em>Text</em> component and a non-react component which inserted by the
+<em>ResourceInclude</em> component.</p>
 
+                    <h3 id="subnav_1_1">2.2 First component</h3>
+                    <p>This part assumes that the project was created according to the previous chapter.</p>
+<ol>
+<li><p>Start watch task</p>
+<ul>
+<li>Open console to folder /src/main/ts</li>
+<li>run the watch task which will automatically deploy all Typescript changes to AEM <code>npm run watch</code></li>
+</ul>
+<p>If your aem instance is not running on localhost:4502 then you need to make these configurations:</p>
+</li>
+</ol>
+<pre><code class="lang-bash">npm config <span class="hljs-operator"><span class="hljs-keyword">set</span> demo:crx <span class="hljs-keyword">http</span>://<span class="hljs-keyword">admin</span>:<span class="hljs-keyword">admin</span>@localhost:<span class="hljs-number">4502</span>/crx/repository/crx.<span class="hljs-keyword">default</span></span>
+</code></pre>
+<ol>
+<li><p>create file</p>
+<p>Create a file MyComponent.tsx under /ui.apps/src/main/ts/</p>
+</li>
+</ol>
+<pre><code class="lang-typescript">
+
+<span class="scala"><span class="hljs-keyword">import</span> {<span class="hljs-type">ResourceComponent</span>} from <span class="hljs-string">"aem-react-js/component/ResourceComponent"</span>;
+<span class="hljs-keyword">import</span> * as <span class="hljs-type">React</span> from <span class="hljs-string">"react"</span>;
+<span class="hljs-keyword">import</span> <span class="hljs-type">Text</span> from <span class="hljs-string">"../text/text"</span>;
+
+export <span class="hljs-keyword">default</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MyComponent</span> <span class="hljs-keyword"><span class="hljs-keyword">extends</span></span> <span class="hljs-title">ResourceComponent&lt;any</span>, <span class="hljs-title">any</span>, <span class="hljs-title">any&gt;</span> {</span>
+    public renderBody(): <span class="hljs-type">React</span>.<span class="hljs-type">ReactElement</span>&lt;any&gt; {
+
+        let label: string = <span class="hljs-keyword">this</span>.getResource().label;
+        <span class="hljs-keyword">return</span> (
+            &lt;div&gt;
+                &lt;span&gt;<span class="hljs-type">Hello</span> {label}&lt;/span&gt;
+                &lt;<span class="hljs-type">Text</span> path=<span class="hljs-string">"text"</span>/&gt;
+            &lt;/div&gt;
+        );
+    }
+}</span>
+</code></pre>
+<ol>
+<li><p>Register component</p>
+<p>Got to componentRegistry.tsx and add a line</p>
+<pre><code class="lang-typescript"><span class="hljs-comment">// add this line at the top</span>
+<span class="hljs-keyword">import</span> MyComponent <span class="hljs-keyword">from</span> <span class="hljs-string">"./MyComponent"</span>;
+...
+<span class="hljs-comment">// add this line after componentRegistry is instantiated</span>
+componentRegistry.register(MyComponent);
+</code></pre>
+</li>
+<li><p>Create component configuration</p>
+<p>Create the component configuration in the appropriate folder <code>/apps/${appsFolderName}/components/my-component</code>.
+The template is an empty file called <code>my-component.jsx</code>. The edit dialog should
+provide a textfield for the property <code>label</code>.</p>
+</li>
+</ol>
+<ul>
+<li>/apps/${appsFolderName}/components/my-component<ul>
+<li>.content.xml</li>
+<li>my-component.jsx</li>
+<li>dialog.xml</li>
+</ul>
+</li>
+</ul>
+<ol>
+<li><p>Synchronize source code to crx</p>
+<p>The component configuration must be uploaded to crx. This can be done
+via maven install -PautoInstallPackage or other means.</p>
+<p>The watch task has already uploaded the javascript file.</p>
+</li>
+<li><p>Open browser</p>
+<p>find the new react component in the sidekick.</p>
+</li>
+</ol>
+
+                <h2 id="nav_2">3 Development Guide</h2>
+                
+                    <h3 id="subnav_2_0">3.1 ResourceComponent</h3>
+                    <p>Create a subclass of resource component</p>
+
+                    <h3 id="subnav_2_1">3.2 Vanilla component</h3>
+                    
+                    <h3 id="subnav_2_2">3.3 Including components</h3>
+                    
+                    <h3 id="subnav_2_3">3.4 Loading Resource</h3>
+                    
+                    <h3 id="subnav_2_4">3.5 Java Api</h3>
+                    
+                    <h3 id="subnav_2_5">3.6 React router</h3>
+                    
         </div>
         <div class="col-md-3">
             <nav id="navigation" class="bs-docs-sidebar affix">
                 <ul class="nav bs-docs-sidenav">
                         <li>
                             <a href="#nav_0">1 Introduction</a>
+                        </li>
+                        <li>
+                            <a href="#nav_1">2 Getting Started</a>
                             <ul class="nav">
                                     <li>
-                                        <a href="#subnav_0_0">1.1 Documentation</a>
+                                        <a href="#subnav_1_0">2.1 Create project</a>
+                                    </li>
+                                    <li>
+                                        <a href="#subnav_1_1">2.2 First component</a>
+                                    </li>
+                            </ul>
+                        </li>
+                        <li>
+                            <a href="#nav_2">3 Development Guide</a>
+                            <ul class="nav">
+                                    <li>
+                                        <a href="#subnav_2_0">3.1 ResourceComponent</a>
+                                    </li>
+                                    <li>
+                                        <a href="#subnav_2_1">3.2 Vanilla component</a>
+                                    </li>
+                                    <li>
+                                        <a href="#subnav_2_2">3.3 Including components</a>
+                                    </li>
+                                    <li>
+                                        <a href="#subnav_2_3">3.4 Loading Resource</a>
+                                    </li>
+                                    <li>
+                                        <a href="#subnav_2_4">3.5 Java Api</a>
+                                    </li>
+                                    <li>
+                                        <a href="#subnav_2_5">3.6 React router</a>
                                     </li>
                             </ul>
                         </li>
@@ -83,7 +329,7 @@
         </div>
     </div>
     <footer class="footer">
-        <p>generated on Thu Oct 06 2016 14:04:22 GMT+0000 (UTC)</p>
+        <p>generated on Fri Oct 07 2016 05:26:42 GMT+0000 (UTC)</p>
     </footer>
 
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
