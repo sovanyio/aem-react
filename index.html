@@ -26,24 +26,33 @@
             <h1>AEM React</h1>
                 <h2 id="nav_0">1 Introduction</h2>
                 
-                    <p>The goal of the AEM React library is to use ReactJs as a templating engine for AEM components.</p>
+                    <p>The goal of the AEM (<a href="http://www.adobe.com/de/marketing-cloud/enterprise-content-management.html">Adobe Experience Manager</a>) React library is to use <a href="https://facebook.github.io/react/">React</a> as a templating engine
+for AEM components. React is a popular javascript ui library by facebook.</p>
 <h4>Why React and AEM?</h4><p>React components are ideal to create web applications with complex client-side interactivity. AEM provides a perfect authoring interface for web content.
 This project brings these technologies together, so that you can build highly interactive web pages with a professional authoring tool.</p>
 <h4>Features</h4><ul>
 <li><a href="http://www.2ality.com/2015/08/isomorphic-javascript.html">Universal</a> React rendering</li>
 <li>High performance javascript execution with a pool of Java 8 <a href="https://docs.oracle.com/javase/8/docs/technotes/guides/scripting/nashorn/">nashorn</a> engines.</li>
 <li>Nesting React components in other AEM components and vice versa is supported.</li>
-<li>Converting vanilla react components into AEM components is supported</li>
+<li>Converting vanilla (plain) react components into AEM components is supported.</li>
 <li>SPA based on react router is supported.</li>
 </ul>
-<h4>Artifacts</h4><p>The aem react project consists of the following parts:</p>
+<h4>Projects</h4><h5>AEM project</h5><p>The <a href="https://github.com/sinnerschrader/aem-react">aem-react project</a> consists of the following parts:</p>
 <ul>
-<li>osgi bundle contains the Sling Script Engine to render AEM components in react.</li>
-<li>npm module contains the basic javascript functionality</li>
+<li>osgi bundle contains the Sling Script Engine to render AEM components written in react.</li>
 <li>maven archetype is a fork of the AEM archetype and adds react support and examples.</li>
 <li>demo content package provides examples for components and SPA.</li>
 </ul>
-<h4>Prerequisites</h4><ul>
+<p>Maven artifact is available via <a href="http://search.maven.org/#search%7Cga%7C1%7Caem-react">maven central</a></p>
+<h5>Javascript project</h5><p>The aem-react projects relies on the <a href="https://github.com/sinnerschrader/aem-react-js">aem-react-js subproject</a>, which provides
+the basic javascript funtionality. It is
+available as <a href="https://www.npmjs.com/package/aem-react-js">npm
+ module</a>.</p>
+<h5>Maven archetype project</h5><p>Lastly a <a href="https://github.com/sinnerschrader/aem-project-archetype">maven-archetype</a> is avilable to quickly create an AEM maven project including react components.
+It is a fork of the existing offical <a href="https://github.com/Adobe-Marketing-Cloud/aem-project-archetype">AEM maven archetype</a>.</p>
+<p>Maven artifact is available via <a href="http://search.maven.org/#search%7Cga%7C1%7Csinnerschrader">maven central</a></p>
+<div class="bs-callout bs-callout-info"><h4>Version </h4><p>This documentation always describes the latest version (not release) of these projects.</p>
+</div><h4>Prerequisites</h4><ul>
 <li><code>&gt;=</code> Java 8 (Oracle JDK with nashorn engine)</li>
 <li><code>&gt;=</code> AEM 6.0</li>
 </ul>
@@ -61,14 +70,17 @@ It already includes some demo content and react components.</p>
 are also assuming that you are developing in Typescript. If you want to use another dialect you need to
 tewak the build scripts.</p>
 
-                    <h3 id="subnav_1_0">2.1 Create project</h3>
+                    <h3 id="subnav_1_0">2.1 First project</h3>
                     <p>To quickly get started we will use the maven archetype.</p>
 <h4>1. create maven project</h4><pre><code class="lang-bash"> mvn archetype:generate \
   -<span class="ruby"><span class="hljs-constant">DarchetypeGroupId</span>=com.sinnerschrader.aem.react \
 </span>  -<span class="ruby"><span class="hljs-constant">DarchetypeArtifactId</span>=aem-project-archetype \
-</span>  -<span class="ruby"><span class="hljs-constant">DarchetypeVersion</span>=<span class="hljs-number">10</span> \</span>
+</span>  -<span class="ruby"><span class="hljs-constant">DarchetypeVersion</span>=<span class="hljs-number">10.1</span> \</span>
 </code></pre>
-<p> You will then be asked a couple of questions about project name and folder names and so on.</p>
+<p> You will then be asked a couple of questions about project name and folder names and so on.
+ These are the same as in the original archetype. Please find detailed
+ explanations <a href="https://docs.adobe.com/docs/en/aem/6-0/develop/dev-tools/ht-projects-maven.html">here</a> in the section &quot;Getting started in
+ 5 minutes&quot;.</p>
 <p><strong>Available properties</strong></p>
 <table class="table table-bordered table-striped">
 <thead>
@@ -146,7 +158,8 @@ tewak the build scripts.</p>
 </tr>
 </tbody>
 </table>
-<h4>4. Open browser</h4><ul>
+<h4>4. Open browser</h4><p>To check what was deployed we will use the Classic UI.</p>
+<ul>
 <li>go to the page /content/${siteName}/en.html</li>
 <li>find react components in sidekick: <em>React Panel</em>, <em>React Text</em> and <em>ReactParsys</em></li>
 <li>find components already on the page</li>
@@ -157,8 +170,13 @@ tewak the build scripts.</p>
         <p >The page en.html with sidekick</p>
     </div>
 </div></p>
-<h4>5. disable author mode</h4><p> Disabled the author mode by appending <code>?wcmmode=disabled</code> to the url.
- Install your <a href="https://chrome.google.com/webstore/detail/react-developer-tools/fmkadmapgofadopljbjfkapdkoienihi">react dev tool</a> in chrome browser. Disable author mode and look at react component tree.</p>
+<h4>5. disable author mode</h4><p>To check that we have actual react components in the page we will use the Classic UI.</p>
+<ul>
+<li>Disabled the author mode by appending <code>?wcmmode=disabled</code> to the url.</li>
+<li>Install your <a href="https://chrome.google.com/webstore/detail/react-developer-tools/fmkadmapgofadopljbjfkapdkoienihi">react dev tool</a> in
+chrome browser.</li>
+<li>Have a look at react component tree.</li>
+</ul>
 <p><div class="center-block caption-fix">
     <img src="page_dev_tool.png" class="center-block img-responsive" alt="title" />
     <div class="caption">
@@ -175,7 +193,7 @@ The Panel&#39;s child is a <em>ReactParsys</em> which contains another <em>Text<
                     <p>This part assumes that the project was created according to the previous chapter.</p>
 <h4>1. Start watch task</h4><p>Start the watch task which transpiles, bundles and uploads the javascript files to AEM.</p>
 <p>Open console to folder /src/main/ts and run the watch task  <code>npm run watch</code>.</p>
-<p>If your aem instance is not running on localhost:4502 then you need to make these configurations:</p>
+<p>If your AEM instance is not running on localhost:4502 then you need to make these configurations:</p>
 <pre><code class="lang-bash">npm config <span class="hljs-operator"><span class="hljs-keyword">set</span> demo:crx <span class="hljs-keyword">http</span>://<span class="hljs-keyword">admin</span>:<span class="hljs-keyword">admin</span>@localhost:<span class="hljs-number">4502</span>/crx/repository/crx.<span class="hljs-keyword">default</span></span>
 </code></pre>
 <p>Alternatively the config in the package.json can be modified.</p>
@@ -247,7 +265,7 @@ by the <code>render</code> method once the resource is successfully fetched. The
     }
 }
 </code></pre>
-<h5>Registering React class as AEM component</h5><h5>Loading Resource</h5><h5>Lazy Loading</h5><h5>Author mode</h5><h5>Java Api</h5>
+
                     <h3 id="subnav_2_1">3.2 Registering react component</h3>
                     <p>There must be one instance of <code>RootComponentRegistry</code>. It is responsible for mapping each React component to a resourceType.
 A component is a registered with one of the <code>ComponentRegistry</code>s which are maped to a resource path.</p>
@@ -287,7 +305,7 @@ is added to the resource tree in the client. This is often the case when the rea
 </code></pre>
 
                     <h3 id="subnav_2_3">3.4 Author mode</h3>
-                    <p>React components are not instantiated in the author mode to prevent anyy interference between AEM javascrpt
+                    <p>React components are not instantiated in the author mode to prevent anyy interference between AEM javascript
 and react. For a lot of components this means that they need to be displayed differently. For example
 an Accordion must display all panels and its corresponding parsys. Use <code>isWcmEnabled()</code> on the server
 to detect the author mode.</p>
@@ -376,18 +394,6 @@ as a AEM component as well.</p>
                     <p>This section describes the development tools for react components that are
 installed in rojects created with the maven archetype.
 The tools are installed in the directory <code>ui.apps/src/main/ts</code>.</p>
-<h4>1. watch task</h4><p>The watch task will watch all files in <code>ui.apps/target/classes/etc/designs/${appsFolderName}</code> and <code>ui.apps/target/classes/apps/${appsFolderName}</code>. If a file is
-changed then the folder is deployed to the running AEM instance via webdav.</p>
-<p>All typescript files will also be watched and automatically transpiled and bundled into
-two javascript files: <code>reactClient.js</code>  and <code>reactServer.js</code>.</p>
-<p>This task will not detect changes in the src folder and hence you need to
-copy files that you want automatically deployed into the target folder. This can be achieved
-in eclipse by configuration of the build path for example.</p>
-<p>Start the watch task which transpiles, bundles and uploads the javascript files to AEM.</p>
-<p>Open console to folder /src/main/ts and run the watch task  <code>npm run watch</code>.</p>
-<p>If your aem instance is not running on localhost:4502 then you need to make these configurations:</p>
-<pre><code class="lang-bash">npm config <span class="hljs-operator"><span class="hljs-keyword">set</span> demo:crx <span class="hljs-keyword">http</span>://<span class="hljs-keyword">admin</span>:<span class="hljs-keyword">admin</span>@localhost:<span class="hljs-number">4502</span>/crx/repository/crx.<span class="hljs-keyword">default</span></span>
-</code></pre>
 
         </div>
         <div class="col-md-3">
@@ -400,7 +406,7 @@ in eclipse by configuration of the build path for example.</p>
                             <a href="#nav_1">2 Getting Started</a>
                             <ul class="nav">
                                     <li>
-                                        <a href="#subnav_1_0">2.1 Create project</a>
+                                        <a href="#subnav_1_0">2.1 First project</a>
                                     </li>
                                     <li>
                                         <a href="#subnav_1_1">2.2 First component</a>
@@ -438,7 +444,7 @@ in eclipse by configuration of the build path for example.</p>
         </div>
     </div>
     <footer class="footer">
-        <p>generated on Mon Oct 10 2016 08:21:00 GMT+0000 (UTC)</p>
+        <p>generated on Sun Oct 16 2016 07:46:01 GMT+0000 (UTC)</p>
     </footer>
 
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
