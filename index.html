@@ -28,31 +28,31 @@
                 
                     <p>The goal of the AEM (<a href="http://www.adobe.com/de/marketing-cloud/enterprise-content-management.html">Adobe Experience Manager</a>) React library is to use <a href="https://facebook.github.io/react/">React</a> as a templating engine
 for AEM components. React is a popular javascript ui library by facebook.</p>
-<h4>Why React and AEM?</h4><p>React components are ideal to create web applications with complex client-side interactivity. AEM provides a perfect authoring interface for web content.
+<h3>Why React and AEM?</h3><p>React components are ideal to create web applications with complex client-side interactivity. AEM provides a perfect authoring interface for web content.
 This project brings these technologies together, so that you can build highly interactive web pages with a professional authoring tool.</p>
-<h4>Features</h4><ul>
+<h3>Features</h3><ul>
 <li><a href="http://www.2ality.com/2015/08/isomorphic-javascript.html">Universal</a> React rendering</li>
 <li>High performance javascript execution with a pool of Java 8 <a href="https://docs.oracle.com/javase/8/docs/technotes/guides/scripting/nashorn/">nashorn</a> engines.</li>
 <li>Nesting React components in other AEM components and vice versa is supported.</li>
 <li>Converting vanilla (plain) react components into AEM components is supported.</li>
 <li>SPA based on react router is supported.</li>
 </ul>
-<h4>Projects</h4><h5>AEM project</h5><p>The <a href="https://github.com/sinnerschrader/aem-react">aem-react project</a> consists of the following parts:</p>
+<h3>Projects</h3><h4>AEM project</h4><p>The <a href="https://github.com/sinnerschrader/aem-react">aem-react project</a> consists of the following parts:</p>
 <ul>
 <li>osgi bundle contains the Sling Script Engine to render AEM components written in react.</li>
 <li>maven archetype is a fork of the AEM archetype and adds react support and examples.</li>
 <li>demo content package provides examples for components and SPA.</li>
 </ul>
 <p>Maven artifact is available via <a href="http://search.maven.org/#search%7Cga%7C1%7Caem-react">maven central</a></p>
-<h5>Javascript project</h5><p>The aem-react projects relies on the <a href="https://github.com/sinnerschrader/aem-react-js">aem-react-js subproject</a>, which provides
+<h4>Javascript project</h4><p>The aem-react projects relies on the <a href="https://github.com/sinnerschrader/aem-react-js">aem-react-js subproject</a>, which provides
 the basic javascript funtionality. It is
 available as <a href="https://www.npmjs.com/package/aem-react-js">npm
  module</a>.</p>
-<h5>Maven archetype project</h5><p>Lastly a <a href="https://github.com/sinnerschrader/aem-project-archetype">maven-archetype</a> is avilable to quickly create an AEM maven project including react components.
+<h4>Maven archetype project</h4><p>Lastly a <a href="https://github.com/sinnerschrader/aem-project-archetype">maven-archetype</a> is avilable to quickly create an AEM maven project including react components.
 It is a fork of the existing offical <a href="https://github.com/Adobe-Marketing-Cloud/aem-project-archetype">AEM maven archetype</a>.</p>
 <p>Maven artifact is available via <a href="http://search.maven.org/#search%7Cga%7C1%7Csinnerschrader">maven central</a></p>
-<div class="bs-callout bs-callout-info"><h4>Version </h4><p>This documentation always describes the latest version (not release) of these projects.</p>
-</div><h4>Prerequisites</h4><ul>
+<div class="bs-callout bs-callout-info"><h3>Version </h3><p>This documentation always describes the latest version (not release) of these projects.</p>
+</div><h3>Prerequisites</h3><ul>
 <li><code>&gt;=</code> Java 8 (Oracle JDK with nashorn engine)</li>
 <li><code>&gt;=</code> AEM 6.0</li>
 </ul>
@@ -240,6 +240,79 @@ provide a textfield for the property <code>./label</code>.</p>
 via maven install -PautoInstallPackage. The watch task has already uploaded the javascript file.</p>
 <h4>6. Open browser</h4><p> find the new react component in the sidekick.</p>
 <h4>7. Continuely improve component</h4>
+                    <h3 id="subnav_1_2">2.3 Demo</h3>
+                    
+                        <p>The aem-react project contains a demo content package.</p>
+<h4>To run the demo</h4><ol>
+<li><p>Clone git repo</p>
+<pre><code class="lang-bash">git <span class="hljs-keyword">clone</span> <span class="hljs-title">https</span>://github.com/sinnerschrader/aem-react.git
+</code></pre>
+</li>
+<li><p>Install into running AEM</p>
+<pre><code class="lang-bash"><span class="hljs-title">mvn</span> install -<span class="hljs-type">PautoInstallPackage</span> -<span class="hljs-type">Daem</span>.<span class="hljs-foreign"><span class="hljs-keyword">port</span>=&lt;<span class="hljs-keyword">port</span>&gt; -Daem.host=&lt;host&gt;</span>
+</code></pre>
+</li>
+</ol>
+<div class="bs-callout bs-callout-warning"><p>
+Currently it is not possible to run the demo and the archetype in the same
+AEM. You need to adjust the path to the javascript in the react script engine via the webconsole.</p>
+</div><h4>SPA with a two level page hierachy</h4><p>Local url: <a href="localhost:4502/editor.html/content/reactdemo/cities.html">/content/reactdemo/cities.html</a></p>
+<p>The SPA (single page application) is based on the <a href="https://github.com/ReactTraining/react-router">react router library</a>.
+The SPA has a welcome view (/cities.html) and a detail view for each
+city (e.g.: /cities/hamburg.html).</p>
+<p><div class="center-block caption-fix">
+    <img src="cities.png" class="center-block img-responsive" alt="title" />
+    <div class="caption">
+        <p >Welcome view</p>
+    </div>
+</div></p>
+<p><div class="center-block caption-fix">
+    <img src="detail.png" class="center-block img-responsive" alt="title" />
+    <div class="caption">
+        <p >Detail view</p>
+    </div>
+</div></p>
+<p>The main AEM react component is <code>CityFinder</code>.
+A city can be selected from the list on the left.
+This list is part of the <code>CityListView</code> react component which is displayed on all views.
+Its child component is either <code>Home</code> for the welcome view or <code>CityView</code> for the detail view.
+In the author mode each view is a single AEM page. Each page contains the CityFinder
+ component which contains the router. <code>Home</code> and <code>CityListView</code> are plain react components while CityFinder and CityView are AEM react
+ components.</p>
+<p>A simplified version of <code>CityFinder</code> looks like this:</p>
+<pre><code class="lang-jsx">export default class CityFinder {
+  renderBody() {
+    return (
+
+      <span class="hljs-tag">&lt;<span class="hljs-title">Router</span> <span class="hljs-attribute">history</span>=<span class="hljs-value">{history}</span>&gt;</span>
+         <span class="hljs-tag">&lt;<span class="hljs-title">Route</span> <span class="hljs-attribute">path</span>=<span class="hljs-value">"cities.html"</span> <span class="hljs-attribute">component</span>=<span class="hljs-value">{CityListView}</span>&gt;</span>
+             <span class="hljs-tag">&lt;<span class="hljs-title">IndexRoute</span> <span class="hljs-attribute">component</span>=<span class="hljs-value">{Home}</span> <span class="hljs-attribute">baseResourcePath</span>=<span class="hljs-value">{resourcePath}</span>/&gt;</span>
+             <span class="hljs-tag">&lt;<span class="hljs-title">Route</span> <span class="hljs-attribute">path</span>=<span class="hljs-value">"cities/(:name).html"</span> <span class="hljs-attribute">resourceComponent</span>=<span class="hljs-value">{CityView}</span> <span class="hljs-attribute">component</span>=<span class="hljs-value">{ResourceRoute}</span>/&gt;</span>
+         <span class="hljs-tag">&lt;/<span class="hljs-title">Route</span>&gt;</span>
+      <span class="hljs-tag">&lt;/<span class="hljs-title">Router</span>&gt;</span>
+
+    );
+   }
+}
+</code></pre>
+<p> The purpose of the generic <code>ResourceRoute</code> component is to translate the current
+ routes dynamic path into a resource path which is passed to <code>CityView</code>.</p>
+<h4>Component list</h4><p> Local url: <a href="localhost:4502/editor.html/content/reactdemo/overview.html">/content/reactdemo/overview.html</a></p>
+<p> The list of components  include:</p>
+<ul>
+<li>simple text component</li>
+<li>embedded component</li>
+<li>accordion component which shows client-side interactivity and serves as a container.</li>
+<li>vanilla component</li>
+<li>vanilla panel which serves as a container</li>
+</ul>
+<p><div class="center-block caption-fix">
+    <img src="demo_overview.png" class="center-block img-responsive" alt="title" />
+    <div class="caption">
+        <p >Overview of example components</p>
+    </div>
+</div></p>
+
                 <h2 id="nav_2">3 Development Guide</h2>
                 
                     <h3 id="subnav_2_0">3.1 ResourceComponent</h3>
@@ -411,6 +484,9 @@ The tools are installed in the directory <code>ui.apps/src/main/ts</code>.</p>
                                     <li>
                                         <a href="#subnav_1_1">2.2 First component</a>
                                     </li>
+                                    <li>
+                                        <a href="#subnav_1_2">2.3 Demo</a>
+                                    </li>
                             </ul>
                         </li>
                         <li>
@@ -444,7 +520,7 @@ The tools are installed in the directory <code>ui.apps/src/main/ts</code>.</p>
         </div>
     </div>
     <footer class="footer">
-        <p>generated on Sun Oct 16 2016 15:23:15 GMT+0000 (UTC)</p>
+        <p>generated on Thu Oct 20 2016 07:53:53 GMT+0000 (UTC)</p>
     </footer>
 
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
