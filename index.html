@@ -465,8 +465,27 @@ as a AEM component as well.</p>
                 <h2 id="nav_3">4 Tools</h2>
                 
                     <p>This section describes the development tools for react components that are
-installed in rojects created with the maven archetype.
+installed in projects created with the maven archetype.
 The tools are installed in the directory <code>ui.apps/src/main/ts</code>.</p>
+
+                    <h3 id="subnav_3_0">4.1 Build Task</h3>
+                    <p>The build task transpiles all typescript files and bundles them into two javascript files and copies them into the appropriate
+target folder in the <code>ui.apps</code> project <code>ui.apps/target/classes/etc/designs/${appsFolderName}/clientlib-site/</code>:</p>
+<ul>
+<li>reactClient.js</li>
+<li>reactServer.js</li>
+</ul>
+<pre><code> npm <span class="hljs-command">run</span> start
+</code></pre>
+                    <h3 id="subnav_3_1">4.2 Watch Task</h3>
+                    <p>The watch task will watch files in the target folder of the ui.apps project and deploys
+them in to AEM. Start the watch task with <code>npm run watch</code>. To configure the address of the running AEM instance
+you need to use npm:</p>
+<pre><code class="lang-bash">npm config <span class="hljs-operator"><span class="hljs-keyword">set</span> demo:crx <span class="hljs-keyword">http</span>://<span class="hljs-keyword">admin</span>:<span class="hljs-keyword">admin</span>@localhost:<span class="hljs-number">4502</span>/crx/repository/crx.<span class="hljs-keyword">default</span></span>
+</code></pre>
+<p>All typescript files are watched and automatically as described in the previous chapter to two javascript files.
+All files below <code>ui.apps/target/classes/etc/designs/${appsFolderName}</code> are watched and deployed into AEM. This includes both the
+transpiled javascript files.</p>
 
         </div>
         <div class="col-md-3">
@@ -514,13 +533,21 @@ The tools are installed in the directory <code>ui.apps/src/main/ts</code>.</p>
                         </li>
                         <li>
                             <a href="#nav_3">4 Tools</a>
+                            <ul class="nav">
+                                    <li>
+                                        <a href="#subnav_3_0">4.1 Build Task</a>
+                                    </li>
+                                    <li>
+                                        <a href="#subnav_3_1">4.2 Watch Task</a>
+                                    </li>
+                            </ul>
                         </li>
                 </ul>
             </nav>
         </div>
     </div>
     <footer class="footer">
-        <p>generated on Fri Oct 28 2016 08:10:43 GMT+0000 (UTC)</p>
+        <p>generated on Fri Oct 28 2016 10:08:32 GMT+0000 (UTC)</p>
     </footer>
 
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
