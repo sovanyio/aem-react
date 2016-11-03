@@ -338,6 +338,22 @@ by the <code>render</code> method once the resource is successfully fetched. The
     }
 }
 </code></pre>
+<h4>Container</h4><p>If the component is a container then it must to render its children by itself. One option is to call <code>renderChildren</code> which
+turns the component into a parsys like container for any child components. If the child components are restricted to a certain type
+  then a custom rendering might be a better solution.</p>
+<pre><code class="lang-typescript">
+<span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-title">renderBody</span>(<span class="hljs-params"></span>): React.ReactElement&lt;any&gt; </span>{
+
+    <span class="hljs-keyword">let</span> label: <span class="hljs-keyword">string</span> = <span class="hljs-keyword">this</span>.getResource().label;
+    <span class="hljs-keyword">let</span> children: React.ReactElement&lt;any&gt;[] =<span class="hljs-keyword">this</span>.renderChildren(<span class="hljs-keyword">this</span>.getResource(), <span class="hljs-string">"children"</span>);
+    <span class="hljs-keyword">return</span> (
+        &lt;div&gt;
+            &lt;span&gt;Hello {label}&lt;/span&gt;
+            {children}
+        &lt;/div&gt;
+    );
+}
+</code></pre>
 
                     <h3 id="subnav_2_1">3.2 Registering react component</h3>
                     <p>There must be one instance of <code>RootComponentRegistry</code>. It is responsible for mapping each React component to a resourceType.
@@ -434,7 +450,7 @@ it can be invoked on the client many times after that.</p>
                     <p>A vanilla react component can be registered
 as a AEM component as well.</p>
 <pre><code class="lang-typescript"><span class="hljs-tag">registry</span><span class="hljs-class">.registerVanilla</span>(<span class="hljs-rules">{<span class="hljs-rule"><span class="hljs-attribute">component</span>:<span class="hljs-value"> TextField</span></span></span>});
-<span class="hljs-tag">registry</span><span class="hljs-class">.registerVanilla</span>(<span class="hljs-rules">{<span class="hljs-rule"><span class="hljs-attribute">component</span>:<span class="hljs-value"> Panel, parsysPath: <span class="hljs-string">"content"</span>, depth: <span class="hljs-number">2</span></span></span></span>});
+<span class="hljs-tag">registry</span><span class="hljs-class">.registerVanilla</span>(<span class="hljs-rules">{<span class="hljs-rule"><span class="hljs-attribute">component</span>:<span class="hljs-value"> Panel, parsys: {path: <span class="hljs-string">"content"</span></span></span></span>}, <span class="hljs-tag">depth</span>: 2});
 </code></pre>
 <p>All resource properties are passed as props to the component.</p>
 <p>For a simple component that only needs a single level of the resource tree
@@ -455,12 +471,71 @@ as a AEM component as well.</p>
 <td>the number of levels of the resource available</td>
 </tr>
 <tr>
-<td> parsysPath</td>
+<td> props?</td>
+<td>any</td>
+<td>extra props that are passed</td>
+</tr>
+<tr>
+<td> parsys?</td>
+<td>object</td>
+<td>define this property to define a parsys as the only child of this component</td>
+</tr>
+<tr>
+<td> parsys.path</td>
 <td>string</td>
-<td>define this property to add a parsys as only child under the given path.</td>
+<td>the relative content path to store children </td>
+</tr>
+<tr>
+<td> parsys.className?</td>
+<td>string</td>
+<td>class name added to the parsys element</td>
+</tr>
+<tr>
+<td> parsys.elementName?</td>
+<td>string</td>
+<td>name of the parsys element (default is &quot;div&quot;)</td>
+</tr>
+<tr>
+<td> parsys.childElementName?</td>
+<td>string</td>
+<td>If provided each child is wrapped in an extra element</td>
+</tr>
+<tr>
+<td> parsys.childClassName?</td>
+<td>string</td>
+<td>class name added to children elements.</td>
+</tr>
+<tr>
+<td> transform?</td>
+<td>function</td>
+<td>a function to tranform the resource into react props</td>
 </tr>
 </tbody>
 </table>
+<h4>Container</h4><p> If the <code>parsys</code> property is set then the vanilla component will be turned into
+ an AEM container. The <code>.content.xml</code> must also set the corresponding attribute:</p>
+<pre><code class="lang-xml"> <span class="hljs-pi">&lt;?xml version="1.0" encoding="UTF-8"?&gt;</span>
+ <span class="hljs-tag">&lt;<span class="hljs-title">jcr:root</span> <span class="hljs-attribute">xmlns:sling</span>=<span class="hljs-value">"http://sling.apache.org/jcr/sling/1.0"</span> <span class="hljs-attribute">xmlns:cq</span>=<span class="hljs-value">"http://www.day.com/jcr/cq/1.0"</span> <span class="hljs-attribute">xmlns:jcr</span>=<span class="hljs-value">"http://www.jcp.org/jcr/1.0"</span>
+     <span class="hljs-attribute">jcr:primaryType</span>=<span class="hljs-value">"cq:Component"</span>
+     <span class="hljs-attribute">jcr:title</span>=<span class="hljs-value">"My Title"</span>
+     <span class="hljs-attribute">cq:isContainer</span>=<span class="hljs-value">"true"</span>
+     /&gt;</span>
+</code></pre>
+<h4>Resource transformation</h4><p>If the resource&#39;s structure does not match the props of the vanilla component then a transformation can be used.
+A transformation is a function that is passed the resource and the resourceComponent and returns the props that will be passed to
+the react component.</p>
+<p>In this example a sling model is used in the transformation:</p>
+<pre><code class="lang-typescript"><span class="hljs-keyword">let</span> transform: <span class="hljs-built_in">any</span> = (resource: <span class="hljs-built_in">any</span>, wrapper: ResourceComponent&lt;<span class="hljs-built_in">any</span>, <span class="hljs-built_in">any</span>, <span class="hljs-built_in">any</span>&gt;) =&gt; {
+    <span class="hljs-keyword">let</span> model: ServiceProxy = r.getResourceModel(<span class="hljs-string">"demop.core.models.MyModel"</span>);
+    <span class="hljs-keyword">let</span> newProps: <span class="hljs-built_in">any</span> = {title: resource.label};
+    newProps[<span class="hljs-string">"imageSrc"</span>] = model.invoke(<span class="hljs-string">"getImageSrc"</span>);
+    <span class="hljs-keyword">return</span> newProps;
+};
+
+registry.registerVanilla({
+    component: myComponent, transform: transform
+});
+</code></pre>
 
                 <h2 id="nav_3">4 Tools</h2>
                 
@@ -547,7 +622,7 @@ transpiled javascript files.</p>
         </div>
     </div>
     <footer class="footer">
-        <p>generated on Fri Oct 28 2016 11:31:05 GMT+0000 (UTC)</p>
+        <p>generated on Thu Nov 03 2016 07:47:56 GMT+0000 (UTC)</p>
     </footer>
 
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
