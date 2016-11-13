@@ -20,13 +20,18 @@
 
 </head>
 <body>
-    <div class="container"/>
-    <div class="row">
-        <div class="col-md-9" style="position:relative">
+    <div class="js_header bs-docs-header" id="content" tabindex="-1">
+        <div class="container">
             <h1>AEM React</h1>
-                <h2 id="nav_0">1 Introduction</h2>
-                
-                    <p>The goal of the AEM (<a href="http://www.adobe.com/de/marketing-cloud/enterprise-content-management.html">Adobe Experience Manager</a>) React library is to use <a href="https://facebook.github.io/react/">React</a> as a templating engine
+            <p>AEM components written in React</p>
+        </div>
+    </div>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-9" style="position:relative">
+                    <h2 id="nav_0">1 Introduction</h2>
+                    
+                        <p>The goal of the AEM (<a href="http://www.adobe.com/de/marketing-cloud/enterprise-content-management.html">Adobe Experience Manager</a>) React library is to use <a href="https://facebook.github.io/react/">React</a> as a templating engine
 for AEM components. React is a popular javascript ui library by facebook.</p>
 <h3>Why React and AEM?</h3><p>React components are ideal to create web applications with complex client-side interactivity. AEM provides a perfect authoring interface for web content.
 This project brings these technologies together, so that you can build highly interactive web pages with a professional authoring tool.</p>
@@ -57,9 +62,9 @@ It is a fork of the existing offical <a href="https://github.com/Adobe-Marketing
 <li><code>&gt;=</code> AEM 6.0</li>
 </ul>
 
-                <h2 id="nav_1">2 Getting Started</h2>
-                
-                    <p>In this guide we will use the maven archetype to generate a project structure.
+                    <h2 id="nav_1">2 Getting Started</h2>
+                    
+                        <p>In this guide we will use the maven archetype to generate a project structure.
 It already includes some demo content and react components.</p>
 <p><em>Requirements</em></p>
 <ul>
@@ -70,8 +75,8 @@ It already includes some demo content and react components.</p>
 are also assuming that you are developing in Typescript. If you want to use another dialect you need to
 tewak the build scripts.</p>
 
-                    <h3 id="subnav_1_0">2.1 First project</h3>
-                    <p>To quickly get started we will use the maven archetype.</p>
+                        <h3 id="subnav_1_0">2.1 First project</h3>
+                        <p>To quickly get started we will use the maven archetype.</p>
 <h4>1. create maven project</h4><pre><code class="lang-bash"> mvn archetype:generate \
   -<span class="ruby"><span class="hljs-constant">DarchetypeGroupId</span>=com.sinnerschrader.aem.react \
 </span>  -<span class="ruby"><span class="hljs-constant">DarchetypeArtifactId</span>=aem-project-archetype \
@@ -189,8 +194,8 @@ The second contains the <em>Panel</em> which is a vanilla react component and th
 The Panel&#39;s child is a <em>ReactParsys</em> which contains another <em>Text</em> component and a non-react component which inserted by the
 <em>ResourceInclude</em> component.</p>
 
-                    <h3 id="subnav_1_1">2.2 First component</h3>
-                    <p>This part assumes that the project was created according to the previous chapter.</p>
+                        <h3 id="subnav_1_1">2.2 First component</h3>
+                        <p>This part assumes that the project was created according to the previous chapter.</p>
 <h4>1. Start watch task</h4><p>Start the watch task which transpiles, bundles and uploads the javascript files to AEM.</p>
 <p>Open console to folder /src/main/ts and run the watch task  <code>npm run watch</code>.</p>
 <p>If your AEM instance is not running on localhost:4502 then you need to make these configurations:</p>
@@ -240,9 +245,9 @@ provide a textfield for the property <code>./label</code>.</p>
 via maven install -PautoInstallPackage. The watch task has already uploaded the javascript file.</p>
 <h4>6. Open browser</h4><p> find the new react component in the sidekick.</p>
 <h4>7. Continuely improve component</h4>
-                    <h3 id="subnav_1_2">2.3 Demo</h3>
-                    
-                        <p>The aem-react project contains a demo content package.</p>
+                        <h3 id="subnav_1_2">2.3 Demo</h3>
+                        
+                            <p>The aem-react project contains a demo content package.</p>
 <h4>To run the demo</h4><ol>
 <li><p>Clone git repo</p>
 <pre><code class="lang-bash">git <span class="hljs-keyword">clone</span> <span class="hljs-title">https</span>://github.com/sinnerschrader/aem-react.git
@@ -313,10 +318,10 @@ In the author mode each view is a single AEM page. Each page contains the CityFi
     </div>
 </div></p>
 
-                <h2 id="nav_2">3 Development Guide</h2>
-                
-                    <h3 id="subnav_2_0">3.1 ResourceComponent</h3>
-                    <p>ResourceComponent is the base class for AEM components. It provides access to the
+                    <h2 id="nav_2">3 Development Guide</h2>
+                    
+                        <h3 id="subnav_2_0">3.1 ResourceComponent</h3>
+                        <p>ResourceComponent is the base class for AEM components. It provides access to the
 resource (content). It also adds the necessary wrapper element, so that the component
 can be edited in the author mode.</p>
 <p>The main method to implement in a ResourceComponent is <code>renderBody()</code>. It is called
@@ -355,8 +360,8 @@ turns the component into a parsys like container for any child components. If th
 }
 </code></pre>
 
-                    <h3 id="subnav_2_1">3.2 Registering react component</h3>
-                    <p>There must be one instance of <code>RootComponentRegistry</code>. It is responsible for mapping each React component to a resourceType.
+                        <h3 id="subnav_2_1">3.2 Registering react component</h3>
+                        <p>There must be one instance of <code>RootComponentRegistry</code>. It is responsible for mapping each React component to a resourceType.
 A component is a registered with one of the <code>ComponentRegistry</code>s which are maped to a resource path.</p>
 <pre><code class="lang-typescript"><span class="hljs-keyword">import</span> ComponentRegistry <span class="hljs-keyword">from</span> <span class="hljs-string">"aem-react-js/ComponentRegistry"</span>;
 <span class="hljs-keyword">import</span> RootComponentRegistry <span class="hljs-keyword">from</span> <span class="hljs-string">"aem-react-js/RootComponentRegistry"</span>;
@@ -372,8 +377,8 @@ AemGlobal.registry = rootComponentRegistry; <span class="hljs-comment">// expose
 </code></pre>
 <p>If your project was created by the maven archetpye then the RootComponentRegistry is already instantiated and you just need to add your <code>ComponentRegistry</code>.`</p>
 
-                    <h3 id="subnav_2_2">3.3 Loading Resource</h3>
-                    <p>The resource will be loaded as json by calling <code>getResource()</code> and therefore the number of levels of the resource tree need to be defined
+                        <h3 id="subnav_2_2">3.3 Loading Resource</h3>
+                        <p>The resource will be loaded as json by calling <code>getResource()</code> and therefore the number of levels of the resource tree need to be defined
  in
 advance by
 overriding the method <code>getDepth()</code>. In accordance with the sling conventions 0 means a single level.</p>
@@ -393,14 +398,14 @@ is added to the resource tree in the client. This is often the case when the rea
     }
 </code></pre>
 
-                    <h3 id="subnav_2_3">3.4 Author mode</h3>
-                    <p>React components are not instantiated in the author mode to prevent anyy interference between AEM javascript
+                        <h3 id="subnav_2_3">3.4 Author mode</h3>
+                        <p>React components are not instantiated in the author mode to prevent anyy interference between AEM javascript
 and react. For a lot of components this means that they need to be displayed differently. For example
 an Accordion must display all panels and its corresponding parsys. Use <code>isWcmEnabled()</code> on the server
 to detect the author mode.</p>
 
-                    <h3 id="subnav_2_4">3.5 Java Api</h3>
-                    <p>Presentation logic is often implemented in sling models. To access a sling model or an osgi service
+                        <h3 id="subnav_2_4">3.5 Java Api</h3>
+                        <p>Presentation logic is often implemented in sling models. To access a sling model or an osgi service
 the fully qualified java class name needs to be passed to appropriate method. The object returned is
 a <code>aem-react-js/ServiceProxy</code>, which has a single method <code>invoke</code>. That method&#39;s first parameter is the
 actual java method to invoke and the remaining parameters are passed to that method.</p>
@@ -446,8 +451,8 @@ it can be invoked on the client many times after that.</p>
 <p> If a service is needed to load data based on user input then you should not
  use the Java api but use a custom http service via plain ajax.</p>
 
-                    <h3 id="subnav_2_5">3.6 Vanilla component</h3>
-                    <p>A vanilla react component can be registered
+                        <h3 id="subnav_2_5">3.6 Vanilla component</h3>
+                        <p>A vanilla react component can be registered
 as a AEM component as well.</p>
 <pre><code class="lang-typescript"><span class="hljs-tag">registry</span><span class="hljs-class">.registerVanilla</span>(<span class="hljs-rules">{<span class="hljs-rule"><span class="hljs-attribute">component</span>:<span class="hljs-value"> TextField</span></span></span>});
 <span class="hljs-tag">registry</span><span class="hljs-class">.registerVanilla</span>(<span class="hljs-rules">{<span class="hljs-rule"><span class="hljs-attribute">component</span>:<span class="hljs-value"> Panel, parsys: {path: <span class="hljs-string">"content"</span></span></span></span>}, <span class="hljs-tag">depth</span>: 2});
@@ -537,14 +542,14 @@ registry.registerVanilla({
 });
 </code></pre>
 
-                <h2 id="nav_3">4 Tools</h2>
-                
-                    <p>This section describes the development tools for react components that are
+                    <h2 id="nav_3">4 Tools</h2>
+                    
+                        <p>This section describes the development tools for react components that are
 installed in projects created with the maven archetype.
 The tools are installed in the directory <code>ui.apps/src/main/ts</code>.</p>
 
-                    <h3 id="subnav_3_0">4.1 Build Task</h3>
-                    <p>The build task transpiles all typescript files and bundles them into two javascript files and copies them into the appropriate
+                        <h3 id="subnav_3_0">4.1 Build Task</h3>
+                        <p>The build task transpiles all typescript files and bundles them into two javascript files and copies them into the appropriate
 target folder in the <code>ui.apps</code> project <code>ui.apps/target/classes/etc/designs/${appsFolderName}/clientlib-site/</code>:</p>
 <ul>
 <li>reactClient.js</li>
@@ -552,8 +557,8 @@ target folder in the <code>ui.apps</code> project <code>ui.apps/target/classes/e
 </ul>
 <pre><code> npm <span class="hljs-command">run</span> start
 </code></pre>
-                    <h3 id="subnav_3_1">4.2 Watch Task</h3>
-                    <p>The watch task will watch files in the target folder of the ui.apps project and deploys
+                        <h3 id="subnav_3_1">4.2 Watch Task</h3>
+                        <p>The watch task will watch files in the target folder of the ui.apps project and deploys
 them in to AEM. Start the watch task with <code>npm run watch</code>. To configure the address of the running AEM instance
 you need to use npm:</p>
 <pre><code class="lang-bash">npm config <span class="hljs-operator"><span class="hljs-keyword">set</span> demo:crx <span class="hljs-keyword">http</span>://<span class="hljs-keyword">admin</span>:<span class="hljs-keyword">admin</span>@localhost:<span class="hljs-number">4502</span>/crx/repository/crx.<span class="hljs-keyword">default</span></span>
@@ -562,73 +567,91 @@ you need to use npm:</p>
 All files below <code>ui.apps/target/classes/etc/designs/${appsFolderName}</code> are watched and deployed into AEM. This includes both the
 transpiled javascript files.</p>
 
+            </div>
+            <div class="col-md-3">
+                <nav id="navigation" class="bs-docs-sidebar">
+                    <ul class="nav bs-docs-sidenav">
+                            <li>
+                                <a href="#nav_0">1 Introduction</a>
+                            </li>
+                            <li>
+                                <a href="#nav_1">2 Getting Started</a>
+                                <ul class="nav">
+                                        <li>
+                                            <a href="#subnav_1_0">2.1 First project</a>
+                                        </li>
+                                        <li>
+                                            <a href="#subnav_1_1">2.2 First component</a>
+                                        </li>
+                                        <li>
+                                            <a href="#subnav_1_2">2.3 Demo</a>
+                                        </li>
+                                </ul>
+                            </li>
+                            <li>
+                                <a href="#nav_2">3 Development Guide</a>
+                                <ul class="nav">
+                                        <li>
+                                            <a href="#subnav_2_0">3.1 ResourceComponent</a>
+                                        </li>
+                                        <li>
+                                            <a href="#subnav_2_1">3.2 Registering react component</a>
+                                        </li>
+                                        <li>
+                                            <a href="#subnav_2_2">3.3 Loading Resource</a>
+                                        </li>
+                                        <li>
+                                            <a href="#subnav_2_3">3.4 Author mode</a>
+                                        </li>
+                                        <li>
+                                            <a href="#subnav_2_4">3.5 Java Api</a>
+                                        </li>
+                                        <li>
+                                            <a href="#subnav_2_5">3.6 Vanilla component</a>
+                                        </li>
+                                </ul>
+                            </li>
+                            <li>
+                                <a href="#nav_3">4 Tools</a>
+                                <ul class="nav">
+                                        <li>
+                                            <a href="#subnav_3_0">4.1 Build Task</a>
+                                        </li>
+                                        <li>
+                                            <a href="#subnav_3_1">4.2 Watch Task</a>
+                                        </li>
+                                </ul>
+                            </li>
+                    </ul>
+                </nav>
+            </div>
         </div>
-        <div class="col-md-3">
-            <nav id="navigation" class="bs-docs-sidebar affix">
-                <ul class="nav bs-docs-sidenav">
-                        <li>
-                            <a href="#nav_0">1 Introduction</a>
-                        </li>
-                        <li>
-                            <a href="#nav_1">2 Getting Started</a>
-                            <ul class="nav">
-                                    <li>
-                                        <a href="#subnav_1_0">2.1 First project</a>
-                                    </li>
-                                    <li>
-                                        <a href="#subnav_1_1">2.2 First component</a>
-                                    </li>
-                                    <li>
-                                        <a href="#subnav_1_2">2.3 Demo</a>
-                                    </li>
-                            </ul>
-                        </li>
-                        <li>
-                            <a href="#nav_2">3 Development Guide</a>
-                            <ul class="nav">
-                                    <li>
-                                        <a href="#subnav_2_0">3.1 ResourceComponent</a>
-                                    </li>
-                                    <li>
-                                        <a href="#subnav_2_1">3.2 Registering react component</a>
-                                    </li>
-                                    <li>
-                                        <a href="#subnav_2_2">3.3 Loading Resource</a>
-                                    </li>
-                                    <li>
-                                        <a href="#subnav_2_3">3.4 Author mode</a>
-                                    </li>
-                                    <li>
-                                        <a href="#subnav_2_4">3.5 Java Api</a>
-                                    </li>
-                                    <li>
-                                        <a href="#subnav_2_5">3.6 Vanilla component</a>
-                                    </li>
-                            </ul>
-                        </li>
-                        <li>
-                            <a href="#nav_3">4 Tools</a>
-                            <ul class="nav">
-                                    <li>
-                                        <a href="#subnav_3_0">4.1 Build Task</a>
-                                    </li>
-                                    <li>
-                                        <a href="#subnav_3_1">4.2 Watch Task</a>
-                                    </li>
-                            </ul>
-                        </li>
-                </ul>
-            </nav>
         </div>
-    </div>
     <footer class="footer">
-        <p>generated on Thu Nov 03 2016 07:47:56 GMT+0000 (UTC)</p>
+        <p>generated on Sun Nov 13 2016 08:34:05 GMT+0000 (UTC)</p>
     </footer>
 
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
     <script src="jquery/dist/jquery.min.js"></script>
     <!-- Include all compiled plugins (below), or include individual files as needed -->
     <script src="bootstrap/dist/js/bootstrap.js"></script>
-    <script>$('body').scrollspy({target: '#navigation'})</script>
+    <script>
+        var headerHeight = document.querySelector(".js_header").getBoundingClientRect().height;
+        var nav = $("#navigation");
+        function checkScroll() {
+            var scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            if (headerHeight<scrollTop) {
+                nav.addClass("affix");
+            } else{
+                nav.removeClass("affix");
+            }
+        }
+        function runOnScroll() {
+            checkScroll();
+        }
+        window.addEventListener("scroll", runOnScroll);
+        $('body').scrollspy({target: '#navigation'})
+        checkScroll();
+    </script>
 </body>
 </html>
