@@ -554,13 +554,176 @@ registry.registerVanilla({
 });
 </code></pre>
 
-                    <h2 id="nav_3">4 Tools</h2>
+                    <h2 id="nav_3">4 Configuration</h2>
+                    
+                        <p>The configuration consists of the osgi service configuration and the javascript
+configuration. The latter is done separately for server and client as there
+is a single javascript file for both server and client each.</p>
+
+                        <h3 id="subnav_3_0">4.1 OSGI</h3>
+                        <p>The main OSGI service is the ReactScriptEngineFactory which has the following
+properties:</p>
+<table class="table table-bordered table-striped">
+<thead>
+<tr>
+<th>name</th>
+<th>description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>scripts.paths</td>
+<td>resource paths to the javascript files for the server</td>
+</tr>
+<tr>
+<td>pool.total.size</td>
+<td>pool size for nashorn engines. Correlates with the number of concurrent requests</td>
+</tr>
+<tr>
+<td>scripts.reload</td>
+<td>whether changes to javascript file should be observed</td>
+</tr>
+<tr>
+<td>subServiceName</td>
+<td>subService name for accessing the crx. If left blank then the deprecated admin is used.</td>
+</tr>
+</tbody>
+</table>
+
+                        <h3 id="subnav_3_1">4.2 Javascript</h3>
+                        <p>There must be two separated javascript bootstrap files. Apart from the Bootstrap files the bundled javascript file includes all the React
+ components, which are the same for both client and server.</p>
+<h4>Server</h4><p>For the server the bootstrap file must provide the method <code>renderReactComponent</code>
+and the <code>RootComponentRegistry</code> on the global variable <code>AemGlobal</code>. The global variable <code>AemGlobal</code> is created by the ScriptEngine.
+The Scriptengine will call <code>AemGlobal.renderReactComponent</code> when an AEM component is rendered.</p>
+<pre><code class="lang-TypeScript">declare <span class="hljs-keyword">var</span> Cqx: any;
+declare <span class="hljs-keyword">var</span> AemGlobal: any;
+
+let rootComponentRegistry: RootComponentRegistry = <span class="hljs-keyword">new</span> RootComponentRegistry();
+AemGlobal.registry = rootComponentRegistry;
+
+AemGlobal.renderReactComponent = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(path: string, resourceType: string, wcmmode: string)</span><span class="hljs-type">: any</span> </span>{
+    ...
+}
+</code></pre>
+<p>The implementation of <code>renderReactComponent</code> instantiates the the Sling implementation for the server which 
+ uses the global variable Cqx provided by the ScriptEngine. Cqx is specific to the current request. 
+ The configuration of the javascript is based on a container which must at least contain the cache and the sling implementation.</p>
+<pre><code class="lang-Typescript">    <span class="hljs-keyword">let</span> container: Container = <span class="hljs-literal">new</span> Container();
+    container<span class="hljs-built_in">.</span>register(<span class="hljs-string">"javaSling"</span>, Cqx<span class="hljs-built_in">.</span>sling);
+    <span class="hljs-keyword">let</span> <span class="hljs-keyword">cache</span>: <span class="hljs-keyword">Cache</span> = <span class="hljs-literal">new</span> <span class="hljs-keyword">Cache</span>();
+    <span class="hljs-keyword">let</span> serverSling = <span class="hljs-literal">new</span> ServerSling(<span class="hljs-keyword">cache</span>, container<span class="hljs-built_in">.</span>get(<span class="hljs-string">"javaSling"</span>));
+    container<span class="hljs-built_in">.</span>register(<span class="hljs-string">"sling"</span>, serverSling);
+    container<span class="hljs-built_in">.</span>register(<span class="hljs-string">"cache"</span>, <span class="hljs-keyword">cache</span>);
+
+    <span class="hljs-keyword">let</span> serverRenderer: ServerRenderer = <span class="hljs-literal">new</span> ServerRenderer(rootComponentRegistry, container);
+    <span class="hljs-keyword">return</span> serverRenderer<span class="hljs-built_in">.</span>renderReactComponent(path, resourceType, wcmmode);
+</code></pre>
+<h4>Client</h4><p>The javascript for the client is included in the html in the usual way. The bootstrap code must instantiate the <code>ComponentManager</code>
+and call <code>initReactComponents</code> on it. This should be done after the document was rendered. Both server and client have an instance of
+<code>RootComponentRegistry</code>, which is basically the same. One main difference between the setups is the <code>Sling</code> instance which is registered
+with the container.The <code>Sling</code> instance for the client uses the cache created on the server or gets data via ajax while the server instance
+uses the Java API directly.</p>
+<pre><code class="lang-Typescript">
+<span class="hljs-interface"><span class="hljs-keyword">interface</span> MyWindow </span>{
+    AemGlobal: <span class="hljs-built_in">any</span>;
+}
+<span class="hljs-keyword">declare</span> <span class="hljs-keyword">var</span> <span class="hljs-built_in">window</span>: MyWindow;
+<span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> <span class="hljs-built_in">window</span> === <span class="hljs-string">"undefined"</span>) {
+    <span class="hljs-keyword">throw</span> <span class="hljs-string">"this is not the browser"</span>;
+}
+
+<span class="hljs-keyword">let</span> rootComponentRegistry: RootComponentRegistry = <span class="hljs-keyword">new</span> RootComponentRegistry();
+rootComponentRegistry.add(componentRegistry);
+rootComponentRegistry.init();
+
+<span class="hljs-keyword">let</span> container: Container = <span class="hljs-keyword">new</span> Container();
+<span class="hljs-keyword">let</span> cache: Cache = <span class="hljs-keyword">new</span> Cache();
+<span class="hljs-keyword">let</span> clientSling: ClientSling = <span class="hljs-keyword">new</span> ClientSling(cache, host);
+container.register(<span class="hljs-string">"sling"</span>, clientSling);
+container.register(<span class="hljs-string">"cache"</span>, cache);
+
+<span class="hljs-keyword">let</span> componentManager: ComponentManager = <span class="hljs-keyword">new</span> ComponentManager(rootComponentRegistry, container);
+componentManager.initReactComponents();
+
+
+<span class="hljs-built_in">window</span>.AemGlobal = {componentManager: componentManager};
+</code></pre>
+
+                    <h2 id="nav_4">5 Single Page Application</h2>
+                    
+                        <p>This section explains how to create a single page application (SPA) using the <a href="https://reacttraining.com/react-router">react-router</a>
+library. The goal of a single page application is to provide content to the user spread 
+across different views that can be navigated like any website but does not require a slow browser reload.
+Each view in this SPA should be bookmarkable if appropriate. The initial view should be rendered
+ on the server for performance reasons and also to make the page crawlable by search bots and the likes.</p>
+
+                        <h3 id="subnav_4_0">5.1 Example</h3>
+                        <p>Usually a single react component contains the router configuration. In this configuration
+all views and their urls are configured. These urls may contain dynamic parts, which are sometimes
+made available to the components comprising the views.</p>
+<p>The example application consists of two views.</p>
+<h5>Welcome view</h5><p>The welcome view presents a list of cities on the left and a welcome message on the right.</p>
+<p><div class="center-block caption-fix">
+    <img src="welcome-wireframe.png" class="center-block img-responsive" alt="title" />
+    <div class="caption">
+        <p >wireframe of welcome view</p>
+    </div>
+</div></p>
+<p>The <code>welcome</code> component tree consists of the <code>CityListView</code> and the <code>Welcome</code> component</p>
+<p><div class="center-block caption-fix">
+    <img src="welcome-component.png" class="center-block img-responsive" alt="title" />
+    <div class="caption">
+        <p >component tree of welcome view</p>
+    </div>
+</div></p>
+<h5>City view</h5><p>The <code>city</code> view presents a list of cities on the left and a welcome message on the right.</p>
+<p><div class="center-block caption-fix">
+    <img src="city-wireframe.png" class="center-block img-responsive" alt="title" />
+    <div class="caption">
+        <p >wireframe of city view</p>
+    </div>
+</div></p>
+<p>The welcome component tree consists of the <code>CityListView</code> and the <code>CityView</code>.</p>
+<p><div class="center-block caption-fix">
+    <img src="city-component.png" class="center-block img-responsive" alt="title" />
+    <div class="caption">
+        <p >component tree of city view</p>
+    </div>
+</div></p>
+<h5>Router</h5><p>There are two routes in this example:</p>
+<ol>
+<li>The route to the welcome view is static: <code>/cities/index.html</code></li>
+<li>The second route points to the individual city views and is dynamic: <code>/cities/(:name).html</code> </li>
+</ol>
+<p>Another aspect of the route definition is how it affects the component tree. The <code>CityListView</code> is present
+in all routes while its child depends on the individual route. The router configuration looks like this:</p>
+<pre><code class="lang-jsx"><span class="hljs-tag">&lt;<span class="hljs-title">Router</span> <span class="hljs-attribute">history</span>=<span class="hljs-value">{history}</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-title">Route</span> <span class="hljs-attribute">path</span>=<span class="hljs-value">'/cities.html'</span> <span class="hljs-attribute">component</span>=<span class="hljs-value">{CityListView}</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-title">IndexRoute</span> <span class="hljs-attribute">component</span>=<span class="hljs-value">{Welcome}</span>/&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-title">Route</span> <span class="hljs-attribute">path</span>=<span class="hljs-value">'/cities/(:name).html'</span> <span class="hljs-attribute">resourceComponent</span>=<span class="hljs-value">{CityView}</span> <span class="hljs-attribute">component</span>=<span class="hljs-value">{ResourceRoute}</span>/&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-title">Route</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-title">Router</span>&gt;</span>
+</code></pre>
+<p>Note that the component of the city view is not the <code>CityView</code> component but a general <code>ResourceRoute</code> component. Its purpose
+is to translate the path to a resourcePath and pass it to the component defined by the <code>resourceComponent</code> property.</p>
+<p>To use this component you create AEM pages resemble the router configuration. </p>
+<ul>
+<li>/cities.html<ul>
+<li>/cities/hamburg.html</li>
+<li>/cities/münchen.html</li>
+</ul>
+</li>
+</ul>
+<div class="bs-callout bs-callout-info"><h4>Important </h4><p>The router component must be located in the same path relative to the page.</p>
+</div>
+                    <h2 id="nav_5">6 Tools</h2>
                     
                         <p>This section describes the development tools for react components that are
 installed in projects created with the maven archetype.
 The tools are installed in the directory <code>ui.apps/src/main/ts</code>.</p>
 
-                        <h3 id="subnav_3_0">4.1 Build Task</h3>
+                        <h3 id="subnav_5_0">6.1 Build Task</h3>
                         <p>The build task transpiles all typescript files and bundles them into two javascript files and copies them into the appropriate
 target folder in the <code>ui.apps</code> project <code>ui.apps/target/classes/etc/designs/${appsFolderName}/clientlib-site/</code>:</p>
 <ul>
@@ -569,7 +732,7 @@ target folder in the <code>ui.apps</code> project <code>ui.apps/target/classes/e
 </ul>
 <pre><code> npm <span class="hljs-command">run</span> start
 </code></pre>
-                        <h3 id="subnav_3_1">4.2 Watch Task</h3>
+                        <h3 id="subnav_5_1">6.2 Watch Task</h3>
                         <p>The watch task will watch files in the target folder of the ui.apps project and deploys
 them in to AEM. Start the watch task with <code>npm run watch</code>. To configure the address of the running AEM instance
 you need to use npm:</p>
@@ -624,13 +787,32 @@ transpiled javascript files.</p>
                                 </ul>
                             </li>
                             <li>
-                                <a href="#nav_3">4 Tools</a>
+                                <a href="#nav_3">4 Configuration</a>
                                 <ul class="nav">
                                         <li>
-                                            <a href="#subnav_3_0">4.1 Build Task</a>
+                                            <a href="#subnav_3_0">4.1 OSGI</a>
                                         </li>
                                         <li>
-                                            <a href="#subnav_3_1">4.2 Watch Task</a>
+                                            <a href="#subnav_3_1">4.2 Javascript</a>
+                                        </li>
+                                </ul>
+                            </li>
+                            <li>
+                                <a href="#nav_4">5 Single Page Application</a>
+                                <ul class="nav">
+                                        <li>
+                                            <a href="#subnav_4_0">5.1 Example</a>
+                                        </li>
+                                </ul>
+                            </li>
+                            <li>
+                                <a href="#nav_5">6 Tools</a>
+                                <ul class="nav">
+                                        <li>
+                                            <a href="#subnav_5_0">6.1 Build Task</a>
+                                        </li>
+                                        <li>
+                                            <a href="#subnav_5_1">6.2 Watch Task</a>
                                         </li>
                                 </ul>
                             </li>
@@ -640,7 +822,7 @@ transpiled javascript files.</p>
         </div>
         </div>
     <footer class="footer">
-        <p>generated on Mon Nov 21 2016 08:09:46 GMT+0000 (UTC)</p>
+        <p>generated on Sat Feb 04 2017 06:53:35 GMT+0000 (UTC)</p>
     </footer>
 
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
