@@ -24,16 +24,11 @@
         <div class="container" >
             <h1 style="color:#fff">AEM React</h1>
             <p style="color:#cdbfe3">AEM components written in React</p>
-                <div style="float:right;">
-                    <a href="index.pdf" target="_blank" type="button" class="btn btn-default">
-                        <span class="glyphicon glyphicon-download-alt"> PDF</span>
-                    </a>
-                </div>
         </div>
     </div>
     <div class="container">
-        <div class="row ">
-            <div class="col-md-9" style="position:relative">
+        <div class="row row-pdf">
+            <div class="" style="position:relative">
                 <div>
                     <h2 id="history">History</h2>
                     <table class="table">
@@ -802,85 +797,6 @@ All files below <code>ui.apps/target/classes/etc/designs/${appsFolderName}</code
 transpiled javascript files.</p>
 
             </div>
-            <div class="col-md-3">
-                <nav id="navigation" class="bs-docs-sidebar affix">
-                    <ul class="nav bs-docs-sidenav">
-                        <li>
-                            <a href="#history" class="history-nav">History</a>
-                        </li>
-                            <li>
-                                <a href="#_introduction">1 Introduction</a>
-                            </li>
-                            <li>
-                                <a href="#_getting_started">2 Getting Started</a>
-                                <ul class="nav">
-                                        <li>
-                                            <a href="#_getting_started_first_project">2.1 First project</a>
-                                        </li>
-                                        <li>
-                                            <a href="#_getting_started_first_component">2.2 First component</a>
-                                        </li>
-                                        <li>
-                                            <a href="#_getting_started_demo">2.3 Demo</a>
-                                        </li>
-                                </ul>
-                            </li>
-                            <li>
-                                <a href="#_development_guide">3 Development Guide</a>
-                                <ul class="nav">
-                                        <li>
-                                            <a href="#_development_guide_resourcecomponent">3.1 ResourceComponent</a>
-                                        </li>
-                                        <li>
-                                            <a href="#_development_guide_registering_react_component">3.2 Registering react component</a>
-                                        </li>
-                                        <li>
-                                            <a href="#_development_guide_loading_resource">3.3 Loading Resource</a>
-                                        </li>
-                                        <li>
-                                            <a href="#_development_guide_author_mode">3.4 Author mode</a>
-                                        </li>
-                                        <li>
-                                            <a href="#_development_guide_java_api">3.5 Java Api</a>
-                                        </li>
-                                        <li>
-                                            <a href="#_development_guide_vanilla_component">3.6 Vanilla component</a>
-                                        </li>
-                                </ul>
-                            </li>
-                            <li>
-                                <a href="#_configuration">4 Configuration</a>
-                                <ul class="nav">
-                                        <li>
-                                            <a href="#_configuration_osgi">4.1 OSGI</a>
-                                        </li>
-                                        <li>
-                                            <a href="#_configuration_javascript">4.2 Javascript</a>
-                                        </li>
-                                </ul>
-                            </li>
-                            <li>
-                                <a href="#_single_page_application">5 Single Page Application</a>
-                                <ul class="nav">
-                                        <li>
-                                            <a href="#_single_page_application_example">5.1 Example</a>
-                                        </li>
-                                </ul>
-                            </li>
-                            <li>
-                                <a href="#_tools">6 Tools</a>
-                                <ul class="nav">
-                                        <li>
-                                            <a href="#_tools_build_task">6.1 Build Task</a>
-                                        </li>
-                                        <li>
-                                            <a href="#_tools_watch_task">6.2 Watch Task</a>
-                                        </li>
-                                </ul>
-                            </li>
-                    </ul>
-                </nav>
-            </div>
         </div>
     </div>
     <footer class="footer">
@@ -891,30 +807,5 @@ transpiled javascript files.</p>
     <script src="jquery/dist/jquery.min.js"></script>
     <!-- Include all compiled plugins (below), or include individual files as needed -->
     <script src="bootstrap/dist/js/bootstrap.js"></script>
-    <script>
-        var headerHeight = document.querySelector(".js_header").getBoundingClientRect().height;
-        var nav = $("#navigation");
-        function checkScroll() {
-            var scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-            if (headerHeight<scrollTop) {
-                nav.addClass("affix");
-            } else{
-                nav.removeClass("affix");
-            }
-        }
-        function runOnScroll() {
-            checkScroll();
-        }
-        window.addEventListener("scroll", runOnScroll);
-        $('body').scrollspy({target: '#navigation'})
-        checkScroll();
-
-        $(document).ready(function () {
-            $('#navigation a').click(function(){
-                var match = $(this).attr('href').match(/#\S+/);
-                ga('send', 'pageview', location.pathname + match[0]);
-            });
-        });
-    </script>
     </body>
 </html>

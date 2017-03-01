@@ -30,7 +30,8 @@
     "type": "range"
   },
   "_requiredBy": [
-    "/"
+    "/",
+    "/count-docu"
   ],
   "_resolved": "https://registry.npmjs.org/jquery/-/jquery-2.2.4.tgz",
   "_shasum": "2c89d6889b5eac522a7eea32c14521559c6cbf02",

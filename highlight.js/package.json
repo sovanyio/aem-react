@@ -25,7 +25,8 @@
     "type": "range"
   },
   "_requiredBy": [
-    "/"
+    "/",
+    "/count-docu"
   ],
   "_resolved": "https://registry.npmjs.org/highlight.js/-/highlight.js-8.9.1.tgz",
   "_shasum": "b8a9c5493212a9392f0222b649c9611497ebfb88",
