@@ -90,11 +90,14 @@ tewak the build scripts.</p>
                         <h3 id="subnav_1_0">2.1 First project</h3>
                         <p>To quickly get started we will use the maven archetype.</p>
 <h4>1. create maven project</h4><pre><code class="lang-bash"> mvn archetype:generate \
-  -<span class="ruby"><span class="hljs-constant">DarchetypeGroupId</span>=com.sinnerschrader.aem.react \
-</span>  -<span class="ruby"><span class="hljs-constant">DarchetypeArtifactId</span>=aem-project-archetype \
-</span>  -<span class="ruby"><span class="hljs-constant">DarchetypeVersion</span>=<span class="hljs-number">10.2</span> \</span>
+  -DarchetypeGroupId=com<span class="hljs-class">.sinnerschrader</span><span class="hljs-class">.aem</span><span class="hljs-class">.react</span> \
+  -DarchetypeArtifactId=aem-project-archetype \
+  -DarchetypeVersion=<span class="hljs-number">10</span><span class="hljs-class">.x</span> \
 </code></pre>
-<p> You will then be asked a couple of questions about project name and folder names and so on.
+<div class="bs-callout bs-callout-info"><p> <strong>Versions</strong></p>
+<p>Get the latest <a href="https://github.com/sinnerschrader/aem-project-archetype/releases">archetypeVersion</a>. After generation of the project make sure that you also have
+the latest versions of the <a href="https://github.com/sinnerschrader/aem-react-js/releases">aem-react-js npm module</a> in <code>ui.apps/src/main/ts/package.json</code> and the latest <a href="https://github.com/sinnerschrader/aem-react/releases">aem-react osgi bundle</a> in <code>core/pom.xml</code>.</p>
+</div><p> You will then be asked a couple of questions about project name and folder names and so on.
  These are the same as in the original archetype. Please find detailed
  explanations <a href="https://docs.adobe.com/docs/en/aem/6-0/develop/dev-tools/ht-projects-maven.html">here</a> in the section &quot;Getting started in
  5 minutes&quot;.</p>
@@ -822,7 +825,7 @@ transpiled javascript files.</p>
         </div>
         </div>
     <footer class="footer">
-        <p>generated on Sat Feb 04 2017 06:53:35 GMT+0000 (UTC)</p>
+        <p>generated on Wed Mar 01 2017 07:06:54 GMT+0000 (UTC)</p>
     </footer>
 
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
