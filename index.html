@@ -44,6 +44,39 @@
                             <th>changed chapters</th>
                         </tr>
                             <tr>
+                                <td>21.3.17</td>
+                                <td>Stefan Meyer </td>
+                                <td>    - Using AemRoute to Router doc (#42)<BR>    <BR>    - Added documentation for including vanilla react components and other AEM components.<BR>    - improved Router documentation<BR><BR></td>
+                                <td>
+                                    <ul>
+                                        <li>
+                                                <a href="#_getting_started_first_component">/Getting Started/First component</a>
+                                        </li>
+                                        <li>
+                                                <a href="#_development_guide_resourcecomponent">/Development Guide/ResourceComponent</a>
+                                        </li>
+                                        <li>
+                                                <a href="#_development_guide_registering_react_component">/Development Guide/Registering react component</a>
+                                        </li>
+                                        <li>
+                                                <a href="#_development_guide_loading_resource">/Development Guide/Loading Resource</a>
+                                        </li>
+                                        <li>
+                                                <a href="#_development_guide_java_api">/Development Guide/Java Api</a>
+                                        </li>
+                                        <li>
+                                                <a href="#_development_guide_vanilla_component">/Development Guide/Vanilla component</a>
+                                        </li>
+                                        <li>
+                                                <a href="#_configuration_javascript">/Configuration/Javascript</a>
+                                        </li>
+                                        <li>
+                                                <a href="#_single_page_application_example">/Single Page Application/Example</a>
+                                        </li>
+                                    </ul>
+                                </td>
+                            </tr>
+                            <tr>
                                 <td>4.3.17</td>
                                 <td>stefan meyer </td>
                                 <td>    added transitions<BR>    - added transitions<BR>    - fixed rendering of wrapper element in partial updates<BR>    - migrated to typings<BR><BR></td>
@@ -58,35 +91,11 @@
                             <tr>
                                 <td>1.3.17</td>
                                 <td>stefan meyer </td>
-                                <td>    added notes to archetype usage about updating dependencies<BR><BR></td>
+                                <td>    added notes to archetype usage about updating dependencies<BR></td>
                                 <td>
                                     <ul>
                                         <li>
                                                 <a href="#_getting_started_first_project">/Getting Started/First project</a>
-                                        </li>
-                                    </ul>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>4.2.17</td>
-                                <td>stefan meyer </td>
-                                <td>    added router docs<BR></td>
-                                <td>
-                                    <ul>
-                                        <li>
-                                                <a href="#_configuration_osgi">/Configuration/OSGI</a>
-                                        </li>
-                                        <li>
-                                                <a href="#_configuration_javascript">/Configuration/Javascript</a>
-                                        </li>
-                                        <li>
-                                                <a href="#_configuration">/Configuration</a>
-                                        </li>
-                                        <li>
-                                                <a href="#_single_page_application_example">/Single Page Application/Example</a>
-                                        </li>
-                                        <li>
-                                                <a href="#_single_page_application">/Single Page Application</a>
                                         </li>
                                     </ul>
                                 </td>
@@ -271,34 +280,36 @@ The Panel&#39;s child is a <em>ReactParsys</em> which contains another <em>Text<
 </code></pre>
 <p>Alternatively the config in the package.json can be modified.</p>
 <h4>2. create file</h4><p>Create a file MyComponent.tsx under /ui.apps/src/main/ts/.</p>
-<pre><code class="lang-typescript">
+<p>````typescript jsx</p>
+<p>import {ResourceComponent} from &quot;aem-react-js/component/ResourceComponent&quot;;
+import * as React from &quot;react&quot;;
+import Text from &quot;../text/text&quot;;</p>
+<p>export default class MyComponent extends ResourceComponent<any, any, any> {
+    public renderBody(): React.ReactElement<any> {</p>
+<pre><code>    let <span class="hljs-keyword">label</span>: string = this.getResource().<span class="hljs-keyword">label</span>;
+    return (
+        <span class="hljs-variable">&lt;div&gt;</span>
+            <span class="hljs-variable">&lt;span&gt;</span>Hello {<span class="hljs-keyword">label</span>}<span class="hljs-variable">&lt;/span&gt;</span>
+            <span class="hljs-variable">&lt;Text path="text"/&gt;</span>
+        <span class="hljs-variable">&lt;/div&gt;</span>
+    );
+}
+</code></pre><p>}</p>
+<pre><code>
 
-<span class="scala"><span class="hljs-keyword">import</span> {<span class="hljs-type">ResourceComponent</span>} from <span class="hljs-string">"aem-react-js/component/ResourceComponent"</span>;
-<span class="hljs-keyword">import</span> * as <span class="hljs-type">React</span> from <span class="hljs-string">"react"</span>;
-<span class="hljs-keyword">import</span> <span class="hljs-type">Text</span> from <span class="hljs-string">"../text/text"</span>;
+<span class="coffeescript">
+<span class="hljs-comment"># 3. Register component</span>
 
-export <span class="hljs-keyword">default</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MyComponent</span> <span class="hljs-keyword"><span class="hljs-keyword">extends</span></span> <span class="hljs-title">ResourceComponent&lt;any</span>, <span class="hljs-title">any</span>, <span class="hljs-title">any&gt;</span> {</span>
-    public renderBody(): <span class="hljs-type">React</span>.<span class="hljs-type">ReactElement</span>&lt;any&gt; {
+The component needs to be associated with a resourceType `<span class="javascript">${appsFolderName}</span>`/components/my-component.
+Open /ui.apps/src/main/ts/componentRegistry.tsx <span class="hljs-keyword">and</span> add two lines
 
-        let label: string = <span class="hljs-keyword">this</span>.getResource().label;
-        <span class="hljs-keyword">return</span> (
-            &lt;div&gt;
-                &lt;span&gt;<span class="hljs-type">Hello</span> {label}&lt;/span&gt;
-                &lt;<span class="hljs-type">Text</span> path=<span class="hljs-string">"text"</span>/&gt;
-            &lt;/div&gt;
-        );
-    }
-}</span>
-</code></pre>
-<h4>3. Register component</h4><p>The component needs to be associated with a resourceType <code>${appsFolderName}</code>/components/my-component.
-Open /ui.apps/src/main/ts/componentRegistry.tsx and add two lines</p>
-<pre><code class="lang-typescript"> <span class="hljs-comment">// add this line at the top</span>
- <span class="hljs-keyword">import</span> MyComponent <span class="hljs-keyword">from</span> <span class="hljs-string">"./MyComponent"</span>;
+ `<span class="javascript"></span>``<span class="javascript"></span>`typescript jsx
+ <span class="hljs-regexp">//</span> add <span class="hljs-keyword">this</span> line at the top
+ import MyComponent from <span class="hljs-string">"./MyComponent"</span>;
  ...
- <span class="hljs-comment">// add this line after componentRegistry is instantiated</span>
- componentRegistry.register(MyComponent);
-</code></pre>
-<h4>4. Create component configuration</h4><p>Create the component configuration in the appropriate folder <code>/apps/${appsFolderName}/components/my-component</code>.
+ <span class="hljs-regexp">//</span> add <span class="hljs-keyword">this</span> line after componentRegistry <span class="hljs-keyword">is</span> instantiated
+ componentRegistry.register(MyComponent);</span>
+</code></pre><h4>4. Create component configuration</h4><p>Create the component configuration in the appropriate folder <code>/apps/${appsFolderName}/components/my-component</code>.
 The template is an empty file called <code>my-component.jsx</code>. The edit dialog should
 provide a textfield for the property <code>./label</code>.</p>
 <ul>
@@ -394,31 +405,34 @@ resource (content). It also adds the necessary wrapper element, so that the comp
 can be edited in the author mode.</p>
 <p>The main method to implement in a ResourceComponent is <code>renderBody()</code>. It is called
 by the <code>render</code> method once the resource is successfully fetched. The resource is available via <code>this.getResource()</code>.</p>
-<pre><code class="lang-typescript">
-<span class="hljs-keyword">import</span> {ResourceComponent} <span class="hljs-keyword">from</span> <span class="hljs-string">"aem-react-js/component/ResourceComponent"</span>;
-<span class="hljs-keyword">import</span> * <span class="hljs-keyword">as</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">"react"</span>;
-<span class="hljs-keyword">import</span> Text <span class="hljs-keyword">from</span> <span class="hljs-string">"../text/text"</span>;
-
-<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MyComponent</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">ResourceComponent</span>&lt;<span class="hljs-title">any</span>, <span class="hljs-title">any</span>, <span class="hljs-title">any</span>&gt; </span>{
-    public renderBody(): React.ReactElement&lt;any&gt; {
-
-        <span class="hljs-keyword">let</span> label: string = <span class="hljs-keyword">this</span>.getResource().label;
-        <span class="hljs-keyword">return</span> (
-            <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-title">div</span>&gt;</span>
-                <span class="hljs-tag">&lt;<span class="hljs-title">span</span>&gt;</span>Hello {label}<span class="hljs-tag">&lt;/<span class="hljs-title">span</span>&gt;</span>
-            <span class="hljs-tag">&lt;/<span class="hljs-title">div</span>&gt;</span>
-        )</span>;
-    }
+<p>````typescript jsx</p>
+<p>import {ResourceComponent} from &quot;aem-react-js/component/ResourceComponent&quot;;
+import * as React from &quot;react&quot;;
+import Text from &quot;../text/text&quot;;</p>
+<p>export default class MyComponent extends ResourceComponent<any, any, any> {
+    public renderBody(): React.ReactElement<any> {</p>
+<pre><code>    let <span class="hljs-keyword">label</span>: string = this.getResource().<span class="hljs-keyword">label</span>;
+    return (
+        <span class="hljs-variable">&lt;div&gt;</span>
+            <span class="hljs-variable">&lt;span&gt;</span>Hello {<span class="hljs-keyword">label</span>}<span class="hljs-variable">&lt;/span&gt;</span>
+        <span class="hljs-variable">&lt;/div&gt;</span>
+    );
 }
-</code></pre>
-<h4>Container</h4><p>If the component is a container then it must to render its children by itself. One option is to call <code>renderChildren</code> which
-turns the component into a parsys like container for any child components. If the child components are restricted to a certain type
-  then a custom rendering might be a better solution.</p>
-<pre><code class="lang-typescript">
-<span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-title">renderBody</span>(<span class="hljs-params"></span>): React.ReactElement&lt;any&gt; </span>{
+</code></pre><p>}</p>
+<pre><code>
+<span class="hljs-comment"># Container</span>
 
-    <span class="hljs-keyword">let</span> label: <span class="hljs-keyword">string</span> = <span class="hljs-keyword">this</span>.getResource().label;
-    <span class="hljs-keyword">let</span> children: React.ReactElement&lt;any&gt;[] =<span class="hljs-keyword">this</span>.renderChildren(<span class="hljs-keyword">this</span>.getResource(), <span class="hljs-string">"children"</span>);
+If the component <span class="hljs-keyword">is</span> a container <span class="hljs-keyword">then</span> <span class="hljs-literal">it</span> must <span class="hljs-keyword">to</span> render its children <span class="hljs-keyword">by</span> itself. One option <span class="hljs-keyword">is</span> <span class="hljs-keyword">to</span> call `renderChildren` which
+turns the component into a parsys like container <span class="hljs-keyword">for</span> any child components. If the child components are restricted <span class="hljs-keyword">to</span> a certain type
+  <span class="hljs-keyword">then</span> a custom rendering might be a better solution.
+
+
+``<span class="javascript"></span>``typescript jsx
+
+public renderBody(): React.ReactElement&lt;any&gt; {
+
+    <span class="hljs-keyword">let</span> <span class="hljs-attribute">label</span>: string = <span class="hljs-keyword">this</span>.getResource().label;
+    <span class="hljs-keyword">let</span> <span class="hljs-attribute">children</span>: React.ReactElement&lt;any&gt;[] =<span class="hljs-keyword">this</span>.renderChildren(<span class="hljs-keyword">this</span>.getResource(), <span class="hljs-string">"children"</span>);
     <span class="hljs-keyword">return</span> (
         &lt;div&gt;
             &lt;span&gt;Hello {label}&lt;/span&gt;
@@ -426,23 +440,25 @@ turns the component into a parsys like container for any child components. If th
         &lt;/div&gt;
     );
 }
-</code></pre>
+</code></pre><h4>Embed AEM components</h4><p>To embed another AEm component you use <code>&lt;ResourceInclude/&gt;</code> and pass path and resourceType.</p>
+<p>````typescript jsx</p>
+<p>  return (<div><ResourceInclude resourceType="/components/text" path="test"/></div>)</p>
+<p>````</p>
 
                         <h3 id="_development_guide_registering_react_component">3.2 Registering react component</h3>
                         <p>There must be one instance of <code>RootComponentRegistry</code>. It is responsible for mapping each React component to a resourceType.
 A component is a registered with one of the <code>ComponentRegistry</code>s which are maped to a resource path.</p>
-<pre><code class="lang-typescript"><span class="hljs-keyword">import</span> ComponentRegistry <span class="hljs-keyword">from</span> <span class="hljs-string">"aem-react-js/ComponentRegistry"</span>;
-<span class="hljs-keyword">import</span> RootComponentRegistry <span class="hljs-keyword">from</span> <span class="hljs-string">"aem-react-js/RootComponentRegistry"</span>;
-<span class="hljs-keyword">import</span> MyComponent <span class="hljs-keyword">from</span> <span class="hljs-string">"./MyComponent"</span>;
-
-<span class="hljs-keyword">let</span> registry: ComponentRegistry = <span class="hljs-keyword">new</span> ComponentRegistry(<span class="hljs-string">"yourproject/components"</span>);
-registry.register(MyComponent); <span class="hljs-comment">// resource type of MyComponent is 'yourproject/components/my-component'</span>
-
-<span class="hljs-keyword">let</span> rootComponentRegistry: RootComponentRegistry = <span class="hljs-keyword">new</span> RootComponentRegistry();
+<p>````typescript jsx
+import ComponentRegistry from &quot;aem-react-js/ComponentRegistry&quot;;
+import RootComponentRegistry from &quot;aem-react-js/RootComponentRegistry&quot;;
+import MyComponent from &quot;./MyComponent&quot;;</p>
+<p>let registry: ComponentRegistry = new ComponentRegistry(&quot;yourproject/components&quot;);
+registry.register(MyComponent); // resource type of MyComponent is &#39;yourproject/components/my-component&#39;</p>
+<p>let rootComponentRegistry: RootComponentRegistry = new RootComponentRegistry();
 rootComponentRegistry.add(componentRegistry);
 rootComponentRegistry.init();
-AemGlobal.registry = rootComponentRegistry; <span class="hljs-comment">// expose registry to Nashorn</span>
-</code></pre>
+AemGlobal.registry = rootComponentRegistry; // expose registry to Nashorn</p>
+<p>````</p>
 <p>If your project was created by the maven archetpye then the RootComponentRegistry is already instantiated and you just need to add your <code>ComponentRegistry</code>.`</p>
 
                         <h3 id="_development_guide_loading_resource">3.3 Loading Resource</h3>
@@ -450,22 +466,26 @@ AemGlobal.registry = rootComponentRegistry; <span class="hljs-comment">// expose
  in
 advance by
 overriding the method <code>getDepth()</code>. In accordance with the sling conventions 0 means a single level.</p>
-<pre><code class="lang-typescript">     <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-title">getDepth</span>(<span class="hljs-params"></span>): number </span>{
-         <span class="hljs-keyword">return</span> <span class="hljs-number">2</span>;
-     }
-</code></pre>
-<h4>Lazy Loading</h4><p>If the resource is not fetched synchronuously then the <code>render</code> method will call <code>renderLoading</code> instead to display a loading spinner or
+<p> ````typescript jsx
+     public getDepth(): number {
+         return 2;
+     }</p>
+<pre><code>
+<span class="hljs-comment"># Lazy Loading</span>
+
+<span class="hljs-type">If</span> the resource <span class="hljs-keyword">is</span> <span class="hljs-keyword">not</span> fetched synchronuously then the `render` <span class="hljs-keyword">method</span> will call `renderLoading` instead to display a loading spinner <span class="hljs-keyword">or</span>
 similar ui.
-Asynchronuous loading happens when a ResourceComponent&#39;s path prop is changed or a new ResourceComponent
-is added to the resource tree in the client. This is often the case when the react router library is used.</p>
-<pre><code class="lang-typescript">    <span class="hljs-keyword">public</span> renderLoading(): React.ReactElement&lt;<span class="hljs-built_in">any</span>&gt; {
+<span class="hljs-type">Asynchronuous</span> loading happens <span class="hljs-keyword">when</span> a <span class="hljs-type">ResourceComponent</span>'s path prop <span class="hljs-keyword">is</span> changed <span class="hljs-keyword">or</span> a new <span class="hljs-type">ResourceComponent</span>
+<span class="hljs-keyword">is</span> added to the resource tree <span class="hljs-keyword">in</span> the client. <span class="hljs-type">This</span> <span class="hljs-keyword">is</span> often the <span class="hljs-keyword">case</span> <span class="hljs-keyword">when</span> the react router library <span class="hljs-keyword">is</span> used.
+
+````typescript jsx
+    public renderLoading(): <span class="hljs-type">React</span>.<span class="hljs-type">ReactElement</span>&lt;<span class="hljs-type">any</span>&gt; {
 
         <span class="hljs-keyword">return</span> (
-            &lt;span&gt;Loading <span class="hljs-type">data</span> ...&lt;/spany&gt;
+            &lt;span&gt;<span class="hljs-type">Loading</span> data ...&lt;/spany&gt;
         );
     }
 </code></pre>
-
                         <h3 id="_development_guide_author_mode">3.4 Author mode</h3>
                         <p>React components are not instantiated in the author mode to prevent anyy interference between AEM javascript
 and react. For a lot of components this means that they need to be displayed differently. For example
@@ -499,18 +519,18 @@ actual java method to invoke and the remaining parameters are passed to that met
 </tr>
 </tbody>
 </table>
-<pre><code class="lang-typescript">    import ServiceProxy <span class="hljs-keyword">from</span> <span class="hljs-string">"aem-react-js/ServiceProxy"</span>;
+<p><code>typescript jsx
+    import ServiceProxy from &quot;aem-react-js/ServiceProxy&quot;;
     ...
-    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-title">renderBody</span>(<span class="hljs-params"></span>): React.ReactElement&lt;any&gt; </span>{
-        <span class="hljs-keyword">let</span> model: ServiceProxy = <span class="hljs-keyword">this</span>.getRequestModel(`com.example.LabelModel`);
-        <span class="hljs-keyword">let</span> label: <span class="hljs-keyword">string</span> = model.invoke(<span class="hljs-string">'getLabel'</span>)
-        <span class="hljs-keyword">return</span> (
+    public renderBody(): React.ReactElement&lt;any&gt; {
+        let model: ServiceProxy = this.getRequestModel(`com.example.LabelModel`);
+        let label: string = model.invoke(&#39;getLabel&#39;)
+        return (
             &lt;div&gt;
                 &lt;span&gt;Hello {label}&lt;/span&gt;
             &lt;/div&gt;
         );
-    }
-</code></pre>
+    }</code></p>
 <p>The Java API methods will be invoked only if the component&#39;s is rendered on the server.
 Otherwise the return value is served from the cache which was created during server rendering.
 It is safe to invoke a java method in the <code>renderBody</code> method. But it must be invoked
@@ -522,99 +542,70 @@ it can be invoked on the client many times after that.</p>
                         <h3 id="_development_guide_vanilla_component">3.6 Vanilla component</h3>
                         <p>A vanilla react component can be registered
 as a AEM component as well.</p>
-<pre><code class="lang-typescript"><span class="hljs-tag">registry</span><span class="hljs-class">.registerVanilla</span>(<span class="hljs-rules">{<span class="hljs-rule"><span class="hljs-attribute">component</span>:<span class="hljs-value"> TextField</span></span></span>});
-<span class="hljs-tag">registry</span><span class="hljs-class">.registerVanilla</span>(<span class="hljs-rules">{<span class="hljs-rule"><span class="hljs-attribute">component</span>:<span class="hljs-value"> Panel, parsys: {path: <span class="hljs-string">"content"</span></span></span></span>}, <span class="hljs-tag">depth</span>: 2});
-</code></pre>
-<p>All resource properties are passed as props to the component.</p>
-<p>For a simple component that only needs a single level of the resource tree
- and doesn&#39;t display children it is sufficient to define the React component class
- that should be registered. The following additional parameters are available</p>
-<table class="table table-bordered table-striped">
-<thead>
-<tr>
-<th>parameter</th>
-<th>type</th>
-<th>description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td> depth</td>
-<td>number</td>
-<td>the number of levels of the resource available</td>
-</tr>
-<tr>
-<td> props?</td>
-<td>any</td>
-<td>extra props that are passed</td>
-</tr>
-<tr>
-<td> parsys?</td>
-<td>object</td>
-<td>define this property to define a parsys as the only child of this component</td>
-</tr>
-<tr>
-<td> parsys.path</td>
-<td>string</td>
-<td>the relative content path to store children </td>
-</tr>
-<tr>
-<td> parsys.className?</td>
-<td>string</td>
-<td>class name added to the parsys element</td>
-</tr>
-<tr>
-<td> parsys.elementName?</td>
-<td>string</td>
-<td>name of the parsys element (default is &quot;div&quot;)</td>
-</tr>
-<tr>
-<td> parsys.childElementName?</td>
-<td>string</td>
-<td>If provided each child is wrapped in an extra element</td>
-</tr>
-<tr>
-<td> parsys.childClassName?</td>
-<td>string</td>
-<td>class name added to children elements.</td>
-</tr>
-<tr>
-<td> transform?</td>
-<td>function</td>
-<td>a function to tranform the resource into react props</td>
-</tr>
-</tbody>
-</table>
-<h4>Container</h4><p> If the <code>parsys</code> property is set then the vanilla component will be turned into
- an AEM container. The <code>.content.xml</code> must also set the corresponding attribute:</p>
-<pre><code class="lang-xml"> <span class="hljs-pi">&lt;?xml version="1.0" encoding="UTF-8"?&gt;</span>
- <span class="hljs-tag">&lt;<span class="hljs-title">jcr:root</span> <span class="hljs-attribute">xmlns:sling</span>=<span class="hljs-value">"http://sling.apache.org/jcr/sling/1.0"</span> <span class="hljs-attribute">xmlns:cq</span>=<span class="hljs-value">"http://www.day.com/jcr/cq/1.0"</span> <span class="hljs-attribute">xmlns:jcr</span>=<span class="hljs-value">"http://www.jcp.org/jcr/1.0"</span>
-     <span class="hljs-attribute">jcr:primaryType</span>=<span class="hljs-value">"cq:Component"</span>
-     <span class="hljs-attribute">jcr:title</span>=<span class="hljs-value">"My Title"</span>
-     <span class="hljs-attribute">cq:isContainer</span>=<span class="hljs-value">"true"</span>
-     /&gt;</span>
-</code></pre>
-<h4>Resource transformation</h4><p>If the resource&#39;s structure does not match the props of the vanilla component then a transformation can be used.
+<p>````typescript jsx
+registry.registerVanilla({component: TextField});
+registry.registerVanilla({component: Panel, parsys: {path: &quot;content&quot;}, depth: 2});</p>
+<pre><code>
+All resource properties are passed <span class="hljs-keyword">as</span> props <span class="hljs-keyword">to</span> <span class="hljs-keyword">the</span> component.
+
+For a simple component <span class="hljs-keyword">that</span> only needs a single level <span class="hljs-keyword">of</span> <span class="hljs-keyword">the</span> resource tree
+ <span class="hljs-keyword">and</span> doesn't display children <span class="hljs-keyword">it</span> <span class="hljs-keyword">is</span> sufficient <span class="hljs-keyword">to</span> define <span class="hljs-keyword">the</span> React component <span class="hljs-type">class</span>
+ <span class="hljs-keyword">that</span> should be registered. The following additional parameters are available
+
+ parameter | type | description
+ <span class="hljs-comment">---|---|---</span>
+ depth | <span class="hljs-type">number</span> | <span class="hljs-keyword">the</span> <span class="hljs-type">number</span> <span class="hljs-keyword">of</span> levels <span class="hljs-keyword">of</span> <span class="hljs-keyword">the</span> resource available
+ props? | any | extra props <span class="hljs-keyword">that</span> are passed
+ parsys? | object | define this <span class="hljs-keyword">property</span> <span class="hljs-keyword">to</span> define a parsys <span class="hljs-keyword">as</span> <span class="hljs-keyword">the</span> only child <span class="hljs-keyword">of</span> this component
+ parsys.path | <span class="hljs-type">string</span> | <span class="hljs-keyword">the</span> relative content <span class="hljs-command">path to</span> store children 
+ parsys.className?| <span class="hljs-type">string</span> | <span class="hljs-type">class</span> <span class="hljs-property">name</span> added <span class="hljs-keyword">to</span> <span class="hljs-keyword">the</span> parsys element
+ parsys.elementName?| <span class="hljs-type">string</span> | <span class="hljs-property">name</span> <span class="hljs-keyword">of</span> <span class="hljs-keyword">the</span> parsys element (default <span class="hljs-keyword">is</span> <span class="hljs-string">"div"</span>)
+ parsys.childElementName?| <span class="hljs-type">string</span>| If provided each child <span class="hljs-keyword">is</span> wrapped <span class="hljs-keyword">in</span> an extra element
+ parsys.childClassName?| <span class="hljs-type">string</span>| <span class="hljs-type">class</span> <span class="hljs-property">name</span> added <span class="hljs-keyword">to</span> children elements.
+ transform? | function | a function <span class="hljs-keyword">to</span> tranform <span class="hljs-keyword">the</span> resource <span class="hljs-keyword">into</span> react props
+
+ <span class="hljs-comment"># Container</span>
+
+ If <span class="hljs-keyword">the</span> `parsys` <span class="hljs-keyword">property</span> <span class="hljs-keyword">is</span> <span class="hljs-keyword">set</span> <span class="hljs-keyword">then</span> <span class="hljs-keyword">the</span> vanilla component will be turned <span class="hljs-keyword">into</span>
+ an AEM container. The `.content.xml` must also <span class="hljs-keyword">set</span> <span class="hljs-keyword">the</span> corresponding attribute:
+
+ ````xml
+ &lt;?xml <span class="hljs-property">version</span>=<span class="hljs-string">"1.0"</span> encoding=<span class="hljs-string">"UTF-8"</span>?&gt;
+ &lt;jcr:root xmlns:sling=<span class="hljs-string">"http://sling.apache.org/jcr/sling/1.0"</span> xmlns:cq=<span class="hljs-string">"http://www.day.com/jcr/cq/1.0"</span> xmlns:jcr=<span class="hljs-string">"http://www.jcp.org/jcr/1.0"</span>
+     jcr:primaryType=<span class="hljs-string">"cq:Component"</span>
+     jcr:title=<span class="hljs-string">"My Title"</span>
+     cq:isContainer=<span class="hljs-string">"true"</span>
+     /&gt;
+</code></pre><h4>Resource transformation</h4><p>If the resource&#39;s structure does not match the props of the vanilla component then a transformation can be used.
 A transformation is a function that is passed the resource and the resourceComponent and returns the props that will be passed to
 the react component.</p>
-<p>In this example a sling model is used in the transformation:</p>
-<pre><code class="lang-typescript"><span class="hljs-keyword">let</span> transform: <span class="hljs-built_in">any</span> = (resource: <span class="hljs-built_in">any</span>, wrapper: ResourceComponent&lt;<span class="hljs-built_in">any</span>, <span class="hljs-built_in">any</span>, <span class="hljs-built_in">any</span>&gt;) =&gt; {
-    <span class="hljs-keyword">let</span> model: ServiceProxy = r.getResourceModel(<span class="hljs-string">"demop.core.models.MyModel"</span>);
-    <span class="hljs-keyword">let</span> newProps: <span class="hljs-built_in">any</span> = {title: resource.label};
-    newProps[<span class="hljs-string">"imageSrc"</span>] = model.invoke(<span class="hljs-string">"getImageSrc"</span>);
-    <span class="hljs-keyword">return</span> newProps;
-};
-
-registry.registerVanilla({
+<p>In this example a sling model is used in the transformation:
+````typescript jsx
+let transform: any = (resource: any, wrapper: ResourceComponent<any, any, any>) =&gt; {
+    let model: ServiceProxy = r.getResourceModel(&quot;demop.core.models.MyModel&quot;);
+    let newProps: any = {title: resource.label};
+    newProps[&quot;imageSrc&quot;] = model.invoke(&quot;getImageSrc&quot;);
+    return newProps;
+};</p>
+<p>registry.registerVanilla({
     component: myComponent, transform: transform
-});
-</code></pre>
-<h4>Include vanilla wrapper</h4><p>When including a vanilla component registered as an AEM component directly in a jsx  you need to use <code>&lt;VanillaInclude/&gt;</code>.
- Otherwise it will not be editable on the page.</p>
-<pre><code class="lang-typescript">  <span class="hljs-tag">&lt;<span class="hljs-title">div</span>&gt;</span>
-     <span class="hljs-tag">&lt;<span class="hljs-title">VanillaInclude</span> <span class="hljs-attribute">path</span>=<span class="hljs-value">"test"</span> <span class="hljs-attribute">component</span>=<span class="hljs-value">{MyVanillaComponent}</span>/&gt;</span>
-  <span class="hljs-tag">&lt;/<span class="hljs-title">div</span>&gt;</span>
-</code></pre>
+});</p>
+<pre><code>
+<span class="hljs-comment"># Include vanilla wrapper</span>
+
+When including <span class="hljs-operator">a</span> vanilla component registered <span class="hljs-keyword">as</span> <span class="hljs-operator">an</span> AEM component directly <span class="hljs-operator">in</span> <span class="hljs-operator">a</span> jsx  you need <span class="hljs-built_in">to</span> use `&lt;VanillaInclude/&gt;`.
+ Otherwise <span class="hljs-keyword">it</span> will <span class="hljs-operator">not</span> be editable <span class="hljs-command"><span class="hljs-keyword">on</span> <span class="hljs-title">the</span> <span class="hljs-title">page</span>.</span>
+
+
+````typescript jsx
+  &lt;<span class="hljs-operator">div</span>&gt;
+     &lt;VanillaInclude path=<span class="hljs-string">"test"</span> component={MyVanillaComponent}/&gt;
+  &lt;/<span class="hljs-operator">div</span>&gt;
+</code></pre><p>alternatively you can also use the standard include:</p>
+<p><code>typescript jsx
+  &lt;div&gt;
+     &lt;ResourceInclude path=&quot;test&quot; resourceType=&quot;/components/my-vanilla&quot;/&gt;
+  &lt;/div&gt;</code></p>
 
                     <h2 id="_configuration">4 Configuration</h2>
                     
@@ -658,20 +649,22 @@ properties:</p>
 <h4>Server</h4><p>For the server the bootstrap file must provide the method <code>renderReactComponent</code>
 and the <code>RootComponentRegistry</code> on the global variable <code>AemGlobal</code>. The global variable <code>AemGlobal</code> is created by the ScriptEngine.
 The Scriptengine will call <code>AemGlobal.renderReactComponent</code> when an AEM component is rendered.</p>
-<pre><code class="lang-TypeScript">declare <span class="hljs-keyword">var</span> Cqx: any;
-declare <span class="hljs-keyword">var</span> AemGlobal: any;
-
-let rootComponentRegistry: RootComponentRegistry = <span class="hljs-keyword">new</span> RootComponentRegistry();
-AemGlobal.registry = rootComponentRegistry;
-
-AemGlobal.renderReactComponent = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(path: string, resourceType: string, wcmmode: string)</span><span class="hljs-type">: any</span> </span>{
+<p>````typescript jsx
+declare var Cqx: any;
+declare var AemGlobal: any;</p>
+<p>let rootComponentRegistry: RootComponentRegistry = new RootComponentRegistry();
+AemGlobal.registry = rootComponentRegistry;</p>
+<p>AemGlobal.renderReactComponent = function (path: string, resourceType: string, wcmmode: string): any {
     ...
-}
-</code></pre>
-<p>The implementation of <code>renderReactComponent</code> instantiates the the Sling implementation for the server which 
- uses the global variable Cqx provided by the ScriptEngine. Cqx is specific to the current request. 
- The configuration of the javascript is based on a container which must at least contain the cache and the sling implementation.</p>
-<pre><code class="lang-Typescript">    <span class="hljs-keyword">let</span> container: Container = <span class="hljs-literal">new</span> Container();
+}</p>
+<pre><code>
+The implementation of <span class="hljs-string">`renderReactComponent`</span> instantiates the the Sling implementation f<span class="hljs-subst">or</span> the server which 
+ uses the <span class="hljs-built_in">global</span> <span class="hljs-built_in">variable</span> Cqx provided <span class="hljs-keyword">by</span> the ScriptEngine<span class="hljs-built_in">. </span>Cqx is specific <span class="hljs-keyword">to</span> the current request<span class="hljs-built_in">. 
+ </span>The configuration of the javascript is based <span class="hljs-keyword">on</span> a container which must at least contain the <span class="hljs-keyword">cache</span> <span class="hljs-subst">and</span> the sling implementation<span class="hljs-built_in">.
+
+
+</span><span class="hljs-string">``</span><span class="hljs-string">``</span>typescript jsx
+    <span class="hljs-keyword">let</span> container: Container = <span class="hljs-literal">new</span> Container();
     container<span class="hljs-built_in">.</span>register(<span class="hljs-string">"javaSling"</span>, Cqx<span class="hljs-built_in">.</span>sling);
     <span class="hljs-keyword">let</span> <span class="hljs-keyword">cache</span>: <span class="hljs-keyword">Cache</span> = <span class="hljs-literal">new</span> <span class="hljs-keyword">Cache</span>();
     <span class="hljs-keyword">let</span> serverSling = <span class="hljs-literal">new</span> ServerSling(<span class="hljs-keyword">cache</span>, container<span class="hljs-built_in">.</span>get(<span class="hljs-string">"javaSling"</span>));
@@ -680,37 +673,31 @@ AemGlobal.renderReactComponent = <span class="hljs-function"><span class="hljs-k
 
     <span class="hljs-keyword">let</span> serverRenderer: ServerRenderer = <span class="hljs-literal">new</span> ServerRenderer(rootComponentRegistry, container);
     <span class="hljs-keyword">return</span> serverRenderer<span class="hljs-built_in">.</span>renderReactComponent(path, resourceType, wcmmode);
-</code></pre>
-<h4>Client</h4><p>The javascript for the client is included in the html in the usual way. The bootstrap code must instantiate the <code>ComponentManager</code>
+</code></pre><h4>Client</h4><p>The javascript for the client is included in the html in the usual way. The bootstrap code must instantiate the <code>ComponentManager</code>
 and call <code>initReactComponents</code> on it. This should be done after the document was rendered. Both server and client have an instance of
 <code>RootComponentRegistry</code>, which is basically the same. One main difference between the setups is the <code>Sling</code> instance which is registered
 with the container.The <code>Sling</code> instance for the client uses the cache created on the server or gets data via ajax while the server instance
 uses the Java API directly.</p>
-<pre><code class="lang-Typescript">
-<span class="hljs-interface"><span class="hljs-keyword">interface</span> MyWindow </span>{
-    AemGlobal: <span class="hljs-built_in">any</span>;
+<p>````typescript jsx</p>
+<p>interface MyWindow {
+    AemGlobal: any;
 }
-<span class="hljs-keyword">declare</span> <span class="hljs-keyword">var</span> <span class="hljs-built_in">window</span>: MyWindow;
-<span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> <span class="hljs-built_in">window</span> === <span class="hljs-string">"undefined"</span>) {
-    <span class="hljs-keyword">throw</span> <span class="hljs-string">"this is not the browser"</span>;
-}
-
-<span class="hljs-keyword">let</span> rootComponentRegistry: RootComponentRegistry = <span class="hljs-keyword">new</span> RootComponentRegistry();
+declare var window: MyWindow;
+if (typeof window === &quot;undefined&quot;) {
+    throw &quot;this is not the browser&quot;;
+}</p>
+<p>let rootComponentRegistry: RootComponentRegistry = new RootComponentRegistry();
 rootComponentRegistry.add(componentRegistry);
-rootComponentRegistry.init();
-
-<span class="hljs-keyword">let</span> container: Container = <span class="hljs-keyword">new</span> Container();
-<span class="hljs-keyword">let</span> cache: Cache = <span class="hljs-keyword">new</span> Cache();
-<span class="hljs-keyword">let</span> clientSling: ClientSling = <span class="hljs-keyword">new</span> ClientSling(cache, host);
-container.register(<span class="hljs-string">"sling"</span>, clientSling);
-container.register(<span class="hljs-string">"cache"</span>, cache);
-
-<span class="hljs-keyword">let</span> componentManager: ComponentManager = <span class="hljs-keyword">new</span> ComponentManager(rootComponentRegistry, container);
-componentManager.initReactComponents();
-
-
-<span class="hljs-built_in">window</span>.AemGlobal = {componentManager: componentManager};
-</code></pre>
+rootComponentRegistry.init();</p>
+<p>let container: Container = new Container();
+let cache: Cache = new Cache();
+let clientSling: ClientSling = new ClientSling(cache, host);
+container.register(&quot;sling&quot;, clientSling);
+container.register(&quot;cache&quot;, cache);</p>
+<p>let componentManager: ComponentManager = new ComponentManager(rootComponentRegistry, container);
+componentManager.initReactComponents();</p>
+<p>window.AemGlobal = {componentManager: componentManager};
+````</p>
 
                     <h2 id="_single_page_application">5 Single Page Application</h2>
                     
@@ -763,7 +750,7 @@ in all routes while its child depends on the individual route. The router config
 <pre><code class="lang-jsx"><span class="hljs-tag">&lt;<span class="hljs-title">Router</span> <span class="hljs-attribute">history</span>=<span class="hljs-value">{history}</span>&gt;</span>
     <span class="hljs-tag">&lt;<span class="hljs-title">Route</span> <span class="hljs-attribute">path</span>=<span class="hljs-value">'/cities.html'</span> <span class="hljs-attribute">component</span>=<span class="hljs-value">{CityListView}</span>&gt;</span>
         <span class="hljs-tag">&lt;<span class="hljs-title">IndexRoute</span> <span class="hljs-attribute">component</span>=<span class="hljs-value">{Welcome}</span>/&gt;</span>
-        <span class="hljs-tag">&lt;<span class="hljs-title">Route</span> <span class="hljs-attribute">path</span>=<span class="hljs-value">'/cities/(:name).html'</span> <span class="hljs-attribute">resourceComponent</span>=<span class="hljs-value">{CityView}</span> <span class="hljs-attribute">component</span>=<span class="hljs-value">{ResourceRoute}</span>/&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-title">AemRoute</span> <span class="hljs-attribute">path</span>=<span class="hljs-value">'/cities/(:name).html'</span> <span class="hljs-attribute">resourceComponent</span>=<span class="hljs-value">{CityView}</span> <span class="hljs-attribute">component</span>=<span class="hljs-value">{ResourceRoute}</span>/&gt;</span>
     <span class="hljs-tag">&lt;/<span class="hljs-title">Route</span>&gt;</span>
 <span class="hljs-tag">&lt;/<span class="hljs-title">Router</span>&gt;</span>
 </code></pre>
@@ -777,8 +764,21 @@ is to translate the path to a resourcePath and pass it to the component defined 
 </ul>
 </li>
 </ul>
-<div class="bs-callout bs-callout-info"><h4>Important </h4><p>The router component must be located in the same path relative to the page.</p>
-</div>
+<div class="bs-callout bs-callout-info"><h4>Important </h4><p>The router component must be located in the same path relative to the page&#39;s root (e.g. jcr:content/par/city_finder).</p>
+</div><p>To decouple the absolute path from the router component it makes sense to store a depth
+property in the router component which makes it possible for the router component to
+derive the root route from the current page path. </p>
+<p><strong>Example</strong>
+The current page is <code>/cities/hamburg.html</code> and the depth is 1 then the root route is <code>/cities</code> and the 
+<code>typscript jsx
+        let root = ...
+        &lt;Router history={history}&gt;
+            &lt;Route path={root+&quot;.html&quot;}&#39; component={CityListView}&gt;
+                &lt;IndexRoute component={Welcome}/&gt;
+                &lt;AemRoute path={root+&quot;/(:name).html&quot;} resourceComponent={CityView} component={ResourceRoute}/&gt;
+            &lt;/Route&gt;
+        &lt;/Router&gt;</code></p>
+
                     <h2 id="_tools">6 Tools</h2>
                     
                         <p>This section describes the development tools for react components that are
@@ -887,7 +887,7 @@ transpiled javascript files.</p>
         </div>
     </div>
     <footer class="footer">
-        <p>generated on 19.3.17 by <a href="https://github.com/sinnerschrader/count-docu">count-docu</a></p>
+        <p>generated on 21.3.17 by <a href="https://github.com/sinnerschrader/count-docu">count-docu</a></p>
     </footer>
 
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
