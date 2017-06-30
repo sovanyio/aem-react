@@ -33,6 +33,13 @@ mvn clean install -PautoInstallPackage
 
 ```
 
+# Deploy core bundle
+
+```bash
+cd aem-react/core
+mvn clean install -PautoInstallBundle
+``
+
 ##Trouble shooting
 
 ### Nashorn engine erro: "No such function renderReactComponent"

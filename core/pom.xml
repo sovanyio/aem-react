@@ -15,6 +15,9 @@
     <packaging>bundle</packaging>
     <name>website - Core</name>
     <description>Core bundle for website</description>
+    <properties>
+        <installPath>/apps/react-demo/install</installPath>
+    </properties>
     <build>
         <plugins>
             <plugin>
@@ -75,7 +78,7 @@
                             <!-- Note that this requires /apps/react-demo/install to exist!! -->
                             <!-- This is typically the case when ui.apps is deployed first -->
                             <!-- Otherwise, create /apps/react-demo/install manually (CRXDE|Lite) -->
-                            <slingUrlSuffix>/apps/react-demo/install/</slingUrlSuffix>
+                            <slingUrlSuffix>${installPath}</slingUrlSuffix>
                             <failOnError>true</failOnError>
                         </configuration>
                     </plugin>
