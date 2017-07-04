@@ -14,9 +14,9 @@
 		<!-- P A R E N T P R O J E C T D E S C R I P T I O N -->
 		<!-- ====================================================================== -->
 		<parent>
-        <groupId>com.sinnerschrader.aem.react</groupId>
+        <groupId>com.sinnerschrader.vw.aem.react</groupId>
         <artifactId>aem-react</artifactId>
-				<version>0.4.3-SNAPSHOT</version>
+				<version>0.5.0-SNAPSHOT</version>
 				<relativePath>../pom.xml</relativePath>
 		</parent>
 
@@ -125,24 +125,7 @@
 														</arguments>
 												</configuration>
 										</execution>
-										<execution>
-												<id>npm start</id>
-												<phase>generate-resources</phase>
-												<goals>
-														<goal>exec</goal>
-												</goals>
-                        <!-- TODO we need to define environment mode: product|development -->
-												<configuration>
-														<skip>${skip-npm-start}</skip>
-														<workingDirectory>${basedir}/src/main/ts</workingDirectory>
-														<executable>npm</executable>
-														<arguments>
-																<argument>run</argument>
-                                <argument>start</argument>
-                                <argument>--env=${javascript.environment}</argument>
-														</arguments>
-												</configuration>
-										</execution>
+							
 								</executions>
 						</plugin>
 
@@ -160,12 +143,12 @@
 										<group>com.sinnerschrader</group>
 										<embeddeds>
 												<embedded>
-														<groupId>com.sinnerschrader.aem.react</groupId>
+														<groupId>com.sinnerschrader.vw.aem.react</groupId>
 														<artifactId>core</artifactId>
 														<target>/apps/react-demo/install</target>
 												</embedded> 
                          <embedded>
-                            <groupId>com.sinnerschrader.aem.react</groupId>
+                            <groupId>com.sinnerschrader.vw.aem.react</groupId>
                             <artifactId>democore</artifactId>
                             <target>/apps/react-demo/install</target>
                         </embedded>
@@ -295,13 +278,13 @@
 		<!-- ====================================================================== -->
 		<dependencies>
 				<dependency>
-						<groupId>com.sinnerschrader.aem.react</groupId>
+						<groupId>com.sinnerschrader.vw.aem.react</groupId>
 						<artifactId>core</artifactId>
 						<version>${project.version}</version>
 				</dependency>
 
         <dependency>
-            <groupId>com.sinnerschrader.aem.react</groupId>
+            <groupId>com.sinnerschrader.vw.aem.react</groupId>
             <artifactId>democore</artifactId>
             <version>${project.version}</version>
         </dependency>
