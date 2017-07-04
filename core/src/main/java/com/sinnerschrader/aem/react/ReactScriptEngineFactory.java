@@ -45,19 +45,13 @@ import com.sinnerschrader.aem.react.repo.RepositoryConnectionFactory;
 @Component(label = "ReactJs Script Engine Factory", metatype = true)
 @Service(ScriptEngineFactory.class)
 @Properties({ @Property(name = "service.description", value = "Reactjs Templating Engine"), //
-		@Property(name = "compatible.javax.script.name", value = "jsx"), // TODO
-																			// also
-																			// use
-																			// it
-																			// for
-																			// extension
-																			// and
-																			// other
-																			// props.
+		@Property(name = "compatible.javax.script.name", value = "jsx"),
 		@Property(name = ReactScriptEngineFactory.PROPERTY_SCRIPTS_PATHS, label = "the jcr paths to the scripts libraries", value = {}, cardinality = Integer.MAX_VALUE), //
 		@Property(name = ReactScriptEngineFactory.PROPERTY_SUBSERVICENAME, label = "the subservicename for accessing the script resources. If it is null then the deprecated system admin will be used.", value = ""), //
 		@Property(name = ReactScriptEngineFactory.PROPERTY_POOL_TOTAL_SIZE, label = "total javascript engine pool size", longValue = 20), //
-		@Property(name = ReactScriptEngineFactory.PROPERTY_SCRIPTS_RELOAD, label = "reload library scripts when they were modified", boolValue = true),//
+		@Property(name = ReactScriptEngineFactory.PROPERTY_SCRIPTS_RELOAD, label = "reload library scripts when they were modified", boolValue = true), //
+		@Property(name = ReactScriptEngineFactory.PROPERTY_ROOT_ELEMENT_NAME, label = "the root element name of the", value = "div"), //
+		@Property(name = ReactScriptEngineFactory.PROPERTY_ROOR_CLASS_NAME, label = "the root element class name", value = ""),//
 })
 public class ReactScriptEngineFactory extends AbstractScriptEngineFactory {
 
@@ -65,6 +59,8 @@ public class ReactScriptEngineFactory extends AbstractScriptEngineFactory {
 	public static final String PROPERTY_SUBSERVICENAME = "subServiceName";
 	public static final String PROPERTY_POOL_TOTAL_SIZE = "pool.total.size";
 	public static final String PROPERTY_SCRIPTS_RELOAD = "scripts.reload";
+	public static final String PROPERTY_ROOT_ELEMENT_NAME = "root.element.name";
+	public static final String PROPERTY_ROOR_CLASS_NAME = "root.element.class.name";
 
 	@Reference
 	private ServletResolver servletResolver;
@@ -167,11 +163,15 @@ public class ReactScriptEngineFactory extends AbstractScriptEngineFactory {
 		scriptResources = PropertiesUtil.toStringArray(context.getProperties().get(PROPERTY_SCRIPTS_PATHS),
 				new String[0]);
 		int poolTotalSize = PropertiesUtil.toInteger(context.getProperties().get(PROPERTY_POOL_TOTAL_SIZE), 20);
+		String rootElementName = PropertiesUtil.toString(context.getProperties().get(PROPERTY_ROOT_ELEMENT_NAME),
+				"div");
+		String rootElementClassName = PropertiesUtil.toString(context.getProperties().get(PROPERTY_ROOR_CLASS_NAME),
+				"");
 		JavacriptEnginePoolFactory javacriptEnginePoolFactory = new JavacriptEnginePoolFactory(
 				createLoader(scriptResources), null);
 		ObjectPool<JavascriptEngine> pool = createPool(poolTotalSize, javacriptEnginePoolFactory);
-		this.engine = new ReactScriptEngine(this, pool, isReloadScripts(context), finder, dynamicClassLoaderManager);
-		this.createScripts();
+		this.engine = new ReactScriptEngine(this, pool, isReloadScripts(context), finder, dynamicClassLoaderManager,
+				rootElementName, rootElementClassName);
 
 		this.listener = new JcrResourceChangeListener(repositoryConnectionFactory,
 				new JcrResourceChangeListener.Listener() {
@@ -181,6 +181,7 @@ public class ReactScriptEngineFactory extends AbstractScriptEngineFactory {
 					}
 				}, subServiceName);
 		this.listener.activate(scriptResources);
+
 	}
 
 	@Modified
