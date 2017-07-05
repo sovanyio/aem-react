@@ -45,7 +45,7 @@
     <repository>
       <id>s2-nexus</id>
       <name>s2-nexus-staging</name>
-      <url>https://repo.sinnerschrader.com/#browse/browse/components:vwa-maven-hosted-1</url>
+      <url>https://repo.sinnerschrader.com/repository/vwa-maven-hosted-1/</url>
     </repository>
   </distributionManagement>
 
