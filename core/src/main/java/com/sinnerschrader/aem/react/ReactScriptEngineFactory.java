@@ -31,6 +31,7 @@ import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.servlets.ServletResolver;
 import org.apache.sling.commons.classloader.DynamicClassLoaderManager;
 import org.apache.sling.commons.osgi.PropertiesUtil;
+import org.apache.sling.models.factory.ModelFactory;
 import org.apache.sling.scripting.api.AbstractScriptEngineFactory;
 import org.osgi.service.component.ComponentContext;
 
@@ -64,6 +65,9 @@ public class ReactScriptEngineFactory extends AbstractScriptEngineFactory {
 
 	@Reference
 	private ServletResolver servletResolver;
+
+	@Reference
+	private ModelFactory modelFactory;
 
 	@Reference
 	private DynamicClassLoaderManager dynamicClassLoaderManager;
@@ -171,7 +175,8 @@ public class ReactScriptEngineFactory extends AbstractScriptEngineFactory {
 				createLoader(scriptResources), null);
 		ObjectPool<JavascriptEngine> pool = createPool(poolTotalSize, javacriptEnginePoolFactory);
 		this.engine = new ReactScriptEngine(this, pool, isReloadScripts(context), finder, dynamicClassLoaderManager,
-				rootElementName, rootElementClassName);
+				rootElementName, rootElementClassName, modelFactory);
+		this.createScripts();
 
 		this.listener = new JcrResourceChangeListener(repositoryConnectionFactory,
 				new JcrResourceChangeListener.Listener() {

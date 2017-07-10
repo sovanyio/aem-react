@@ -20,10 +20,14 @@ public class ModelFactory {
 
 	private ClassLoader classLoader;
 
-	public ModelFactory(ClassLoader classLoader, SlingHttpServletRequest request) {
+	private org.apache.sling.models.factory.ModelFactory modelFactory;
+
+	public ModelFactory(ClassLoader classLoader, SlingHttpServletRequest request,
+			org.apache.sling.models.factory.ModelFactory modelFactory) {
 		super();
 		this.classLoader = classLoader;
 		this.request = request;
+		this.modelFactory = modelFactory;
 	}
 
 	private SlingHttpServletRequest request;
@@ -58,7 +62,7 @@ public class ModelFactory {
 		return createModel(className, request.getResourceResolver().getResource(path));
 	}
 
-	private JsProxy createModel(String className, Adaptable adapatable) {
+	private JsProxy createModel(String className, Adaptable adaptable) {
 
 		Class<?> clazz;
 		try {
@@ -67,7 +71,7 @@ public class ModelFactory {
 			LOGGER.error("could not find model class " + className);
 			return null;
 		}
-		Object object = adapatable.adaptTo(clazz);
+		Object object = modelFactory.createModel(adaptable, clazz);
 
 		if (object == null) {
 			return null;

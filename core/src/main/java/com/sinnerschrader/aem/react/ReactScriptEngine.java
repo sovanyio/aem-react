@@ -16,6 +16,7 @@ import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.scripting.SlingBindings;
+import org.apache.sling.api.scripting.SlingScriptHelper;
 import org.apache.sling.commons.classloader.DynamicClassLoaderManager;
 import org.apache.sling.commons.json.JSONException;
 import org.apache.sling.commons.json.JSONObject;
@@ -49,6 +50,7 @@ public class ReactScriptEngine extends AbstractSlingScriptEngine {
 	private DynamicClassLoaderManager dynamicClassLoaderManager;
 	private String rootElementName;
 	private String rootElementClass;
+	private org.apache.sling.models.factory.ModelFactory modelFactory;
 
 	/**
 	 * This class is the result of rendering a react component(-tree). It
@@ -64,7 +66,8 @@ public class ReactScriptEngine extends AbstractSlingScriptEngine {
 
 	protected ReactScriptEngine(ReactScriptEngineFactory scriptEngineFactory, ObjectPool<JavascriptEngine> enginePool,
 			boolean reloadScripts, OsgiServiceFinder finder, DynamicClassLoaderManager dynamicClassLoaderManager,
-			String rootElementName, String rootElementClass) {
+			String rootElementName, String rootElementClass,
+			org.apache.sling.models.factory.ModelFactory modelFactory) {
 		super(scriptEngineFactory);
 
 		this.mapper = new ObjectMapper();
@@ -76,6 +79,7 @@ public class ReactScriptEngine extends AbstractSlingScriptEngine {
 		this.dynamicClassLoaderManager = dynamicClassLoaderManager;
 		this.rootElementName = rootElementName;
 		this.rootElementClass = rootElementClass;
+		this.modelFactory = modelFactory;
 	}
 
 	@Override
@@ -86,10 +90,18 @@ public class ReactScriptEngine extends AbstractSlingScriptEngine {
 			Thread.currentThread().setContextClassLoader(((ReactScriptEngineFactory) getFactory()).getClassLoader());
 
 			Bindings bindings = scriptContext.getBindings(ScriptContext.ENGINE_SCOPE);
+			SlingScriptHelper sling = (SlingScriptHelper) bindings.get(SlingBindings.SLING);
 			SlingHttpServletRequest request = (SlingHttpServletRequest) bindings.get(SlingBindings.REQUEST);
 			SlingHttpServletResponse response = (SlingHttpServletResponse) bindings.get(SlingBindings.RESPONSE);
 			boolean renderAsJson = Arrays.asList(request.getRequestPathInfo().getSelectors()).indexOf("json") >= 0;
 			Resource resource = request.getResource();
+
+			SlingBindings slingBindings = (SlingBindings) request.getAttribute(SlingBindings.class.getName());
+			if (slingBindings == null) {
+				slingBindings = new SlingBindings();
+				slingBindings.setSling(sling);
+				request.setAttribute(SlingBindings.class.getName(), slingBindings);
+			}
 
 			boolean dialog = request.getAttribute(Sling.ATTRIBUTE_AEM_REACT_DIALOG) != null;
 
@@ -185,7 +197,7 @@ public class ReactScriptEngine extends AbstractSlingScriptEngine {
 				.get(SlingBindings.REQUEST);
 
 		ClassLoader classLoader = dynamicClassLoaderManager.getDynamicClassLoader();
-		return new Cqx(new Sling(ctx), finder, new ModelFactory(classLoader, request));
+		return new Cqx(new Sling(ctx), finder, new ModelFactory(classLoader, request, modelFactory));
 	}
 
 	/**
