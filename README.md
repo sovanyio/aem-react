@@ -29,7 +29,7 @@ git clone https://github.com/sinnerschrader/aem-react.git
 
 cd aem-react
 
-mvn clean install -PautoInstallPackage
+mvn clean install -PautoInstallPackage -Dgpg.skip=true
 
 ```
 
