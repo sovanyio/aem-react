@@ -2,6 +2,7 @@ package com.sinnerschrader.aem.react.api;
 
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.adapter.Adaptable;
+import org.apache.sling.api.resource.NonExistingResource;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.wrappers.SlingHttpServletRequestWrapper;
 import org.slf4j.Logger;
@@ -44,7 +45,12 @@ public class ModelFactory {
 
 			@Override
 			public Resource getResource() {
-				return request.getResourceResolver().getResource(path);
+
+				Resource currentResource = request.getResourceResolver().getResource(path);
+				if (currentResource == null) {
+					return new NonExistingResource(request.getResourceResolver(), path);
+				}
+				return currentResource;
 			}
 
 		});
