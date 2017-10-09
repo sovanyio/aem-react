@@ -1,5 +1,7 @@
 package com.sinnerschrader.aem.react.api;
 
+import com.adobe.granite.xss.XSSAPI;
+
 /**
  *
  * An instance of this class is made available to the js script engine.
@@ -12,12 +14,14 @@ public class Cqx {
 	private Sling sling;
 	private OsgiServiceFinder finder;
 	private ModelFactory modelFactory;
+	private XSSAPI xssApi;
 
-	public Cqx(Sling sling, OsgiServiceFinder finder, ModelFactory modelFactory) {
+	public Cqx(Sling sling, OsgiServiceFinder finder, ModelFactory modelFactory, XSSAPI xssApi) {
 		super();
 		this.sling = sling;
 		this.finder = finder;
 		this.modelFactory = modelFactory;
+		this.xssApi = xssApi;
 	}
 
 	/**
@@ -55,11 +59,15 @@ public class Cqx {
 
 	/**
 	 * get access to resource via the sling objects
-	 * 
+	 *
 	 * @return
 	 */
 	public Sling getSling() {
 		return sling;
+	}
+
+	public XSSAPI getXssApi() {
+		return xssApi;
 	}
 
 }

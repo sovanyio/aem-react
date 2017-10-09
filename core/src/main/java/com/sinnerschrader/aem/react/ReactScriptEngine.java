@@ -25,6 +25,7 @@ import org.apache.sling.scripting.api.AbstractSlingScriptEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.adobe.granite.xss.XSSAPI;
 import com.day.cq.wcm.api.WCMMode;
 import com.fasterxml.jackson.core.JsonGenerator.Feature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -53,8 +54,8 @@ public class ReactScriptEngine extends AbstractSlingScriptEngine {
 	private org.apache.sling.models.factory.ModelFactory modelFactory;
 
 	/**
-	 * This class is the result of rendering a react component(-tree). It
-	 * consists of html and cache.
+	 * This class is the result of rendering a react component(-tree). It consists
+	 * of html and cache.
 	 *
 	 * @author stemey
 	 *
@@ -195,9 +196,12 @@ public class ReactScriptEngine extends AbstractSlingScriptEngine {
 	private Cqx createCqx(ScriptContext ctx) {
 		SlingHttpServletRequest request = (SlingHttpServletRequest) ctx.getBindings(ScriptContext.ENGINE_SCOPE)
 				.get(SlingBindings.REQUEST);
+		SlingScriptHelper sling = (SlingScriptHelper) ctx.getBindings(ScriptContext.ENGINE_SCOPE)
+				.get(SlingBindings.SLING);
 
 		ClassLoader classLoader = dynamicClassLoaderManager.getDynamicClassLoader();
-		return new Cqx(new Sling(ctx), finder, new ModelFactory(classLoader, request, modelFactory));
+		return new Cqx(new Sling(ctx), finder, new ModelFactory(classLoader, request, modelFactory),
+				sling.getService(XSSAPI.class));
 	}
 
 	/**

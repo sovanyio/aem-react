@@ -15,6 +15,7 @@ import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.request.RequestPathInfo;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.scripting.SlingBindings;
+import org.apache.sling.api.scripting.SlingScriptHelper;
 import org.apache.sling.commons.classloader.DynamicClassLoaderManager;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -63,6 +64,9 @@ public class ReactScriptEngineTest {
 	@Mock
 	private JavascriptEngine engine;
 
+	@Mock
+	private SlingScriptHelper sling;
+
 	private ObjectNode getJsonFromTextArea(Element ta) throws IOException, JsonProcessingException {
 		ObjectMapper objectMapper = new ObjectMapper();
 		ObjectNode json = (ObjectNode) objectMapper.readTree(ta.html());
@@ -90,6 +94,7 @@ public class ReactScriptEngineTest {
 		Bindings bindings = scriptContext.getBindings(ScriptContext.ENGINE_SCOPE);
 		bindings.put(SlingBindings.REQUEST, request);
 		bindings.put(SlingBindings.RESPONSE, response);
+		bindings.put(SlingBindings.SLING, sling);
 		Mockito.when(request.getRequestPathInfo()).thenReturn(info);
 		Mockito.when(info.getSelectors()).thenReturn(new String[0]);
 

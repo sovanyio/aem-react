@@ -58,6 +58,8 @@ registry.registerVanilla({
 });
 ````
 
+Resource transformations are only executed on the server. The result is cached and send to the client. 
+
 # Include vanilla wrapper
 
 When including a vanilla component registered as an AEM component directly in a jsx  you need to use `<VanillaInclude/>`.

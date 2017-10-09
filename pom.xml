@@ -30,15 +30,14 @@
 
   <modules>
     <module>core</module>
-    <module>democore</module>
-    <module>demo</module>
+<!--    <module>democore</module> --> 
+<!--     <module>demo</module> -->
   </modules>
   
   <scm>
     <connection>scm:git://git@git.sinnerschrader.com/vwa/aem-react.git</connection>
     <developerConnection>scm:git:git@git.sinnerschrader.com:vwa/aem-react.git</developerConnection>
     <url>https://git.sinnerschrader.com/vwa/aem-react.git</url>
-    <tag>aem-react-0.6.2</tag>
   </scm>
 
   <distributionManagement>
