@@ -3,6 +3,8 @@ package com.sinnerschrader.aem.react;
 import org.apache.commons.pool2.BasePooledObjectFactory;
 import org.apache.commons.pool2.PooledObject;
 import org.apache.commons.pool2.impl.DefaultPooledObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.sinnerschrader.aem.react.loader.ScriptCollectionLoader;
 
@@ -17,24 +19,26 @@ import com.sinnerschrader.aem.react.loader.ScriptCollectionLoader;
  */
 public class JavacriptEnginePoolFactory extends BasePooledObjectFactory<JavascriptEngine> {
 
-  private ScriptCollectionLoader loader;
-  private Object sling;
+	private static final Logger LOGGER = LoggerFactory.getLogger(JavacriptEnginePoolFactory.class);
+	private ScriptCollectionLoader loader;
+	private Object sling;
 
-  public JavacriptEnginePoolFactory(ScriptCollectionLoader loader, Object sling) {
-    this.loader = loader;
-    this.sling = sling;
-  }
+	public JavacriptEnginePoolFactory(ScriptCollectionLoader loader, Object sling) {
+		this.loader = loader;
+		this.sling = sling;
+	}
 
-  @Override
-  public JavascriptEngine create() throws Exception {
-    JavascriptEngine javascriptEngine = new JavascriptEngine();
-    javascriptEngine.initialize(loader, sling);
-    return javascriptEngine;
-  }
+	@Override
+	public JavascriptEngine create() throws Exception {
+		LOGGER.error("created new javascript engine");
+		JavascriptEngine javascriptEngine = new JavascriptEngine();
+		javascriptEngine.initialize(loader, sling);
+		return javascriptEngine;
+	}
 
-  @Override
-  public PooledObject<JavascriptEngine> wrap(JavascriptEngine engine) {
-    return new DefaultPooledObject<JavascriptEngine>(engine);
-  }
+	@Override
+	public PooledObject<JavascriptEngine> wrap(JavascriptEngine engine) {
+		return new DefaultPooledObject<JavascriptEngine>(engine);
+	}
 
 }

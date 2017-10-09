@@ -37,6 +37,8 @@ import com.sinnerschrader.aem.react.exception.TechnicalException;
 
 public class ReactScriptEngine extends AbstractSlingScriptEngine {
 
+	private static final String REACT_CONTEXT_KEY = "com.sinnerschrader.aem.react.ReactContext";
+
 	public interface Command {
 		public Object execute(JavascriptEngine e);
 	}
@@ -63,6 +65,7 @@ public class ReactScriptEngine extends AbstractSlingScriptEngine {
 	public static class RenderResult {
 		public String html;
 		public String cache;
+		public Object reactContext;
 	}
 
 	protected ReactScriptEngine(ReactScriptEngineFactory scriptEngineFactory, ObjectPool<JavascriptEngine> enginePool,
@@ -116,10 +119,12 @@ public class ReactScriptEngine extends AbstractSlingScriptEngine {
 			boolean serverRendering = !SERVER_RENDERING_DISABLED.equals(request.getParameter(SERVER_RENDERING_PARAM));
 			String cacheString = null;
 			if (serverRendering) {
+				final Object reactContext = request.getAttribute(REACT_CONTEXT_KEY);
 				RenderResult result = renderReactMarkup(resource.getPath(), resource.getResourceType(),
-						getWcmMode(request), scriptContext, renderAsJson);
+						getWcmMode(request), scriptContext, renderAsJson, reactContext);
 				renderedHtml = result.html;
 				cacheString = result.cache;
+				request.setAttribute(REACT_CONTEXT_KEY, result.reactContext);
 			} else if (renderAsJson) {
 				// development mode: return cache with just the current
 				// resource.
@@ -214,7 +219,7 @@ public class ReactScriptEngine extends AbstractSlingScriptEngine {
 	 * @return
 	 */
 	private RenderResult renderReactMarkup(String path, String resourceType, String wcmmode,
-			ScriptContext scriptContext, boolean renderRootDialog) {
+			ScriptContext scriptContext, boolean renderAsJson, Object reactContext) {
 		JavascriptEngine javascriptEngine;
 		try {
 			javascriptEngine = enginePool.borrowObject();
@@ -222,7 +227,8 @@ public class ReactScriptEngine extends AbstractSlingScriptEngine {
 				if (reloadScripts) {
 					javascriptEngine.reloadScripts();
 				}
-				return javascriptEngine.render(path, resourceType, wcmmode, createCqx(scriptContext), renderRootDialog);
+				return javascriptEngine.render(path, resourceType, wcmmode, createCqx(scriptContext), renderAsJson,
+						reactContext);
 			} finally {
 
 				enginePool.returnObject(javascriptEngine);

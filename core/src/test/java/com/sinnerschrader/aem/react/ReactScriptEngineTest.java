@@ -110,7 +110,7 @@ public class ReactScriptEngineTest {
 		Mockito.when(request.getResource()).thenReturn(resource);
 
 		Mockito.when(engine.render(Matchers.eq(path), Matchers.eq(resourceType), Matchers.eq("disabled"),
-				Mockito.anyObject(), Matchers.eq(false))).thenReturn(result);
+				Mockito.anyObject(), Matchers.eq(false), Matchers.eq(null))).thenReturn(result);
 		RenderResult renderResult = (RenderResult) r.eval(new StringReader(""), scriptContext);
 		Assert.assertNull(renderResult);
 		String renderedHtml = writer.getBuffer().toString();
