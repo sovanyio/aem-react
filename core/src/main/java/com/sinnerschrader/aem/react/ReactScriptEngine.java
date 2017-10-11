@@ -27,7 +27,6 @@ import org.slf4j.LoggerFactory;
 
 import com.adobe.granite.xss.XSSAPI;
 import com.day.cq.wcm.api.WCMMode;
-import com.fasterxml.jackson.core.JsonGenerator.Feature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sinnerschrader.aem.react.api.Cqx;
 import com.sinnerschrader.aem.react.api.ModelFactory;
@@ -70,13 +69,11 @@ public class ReactScriptEngine extends AbstractSlingScriptEngine {
 
 	protected ReactScriptEngine(ReactScriptEngineFactory scriptEngineFactory, ObjectPool<JavascriptEngine> enginePool,
 			boolean reloadScripts, OsgiServiceFinder finder, DynamicClassLoaderManager dynamicClassLoaderManager,
-			String rootElementName, String rootElementClass,
-			org.apache.sling.models.factory.ModelFactory modelFactory) {
+			String rootElementName, String rootElementClass, org.apache.sling.models.factory.ModelFactory modelFactory,
+			ObjectMapper mapper) {
 		super(scriptEngineFactory);
 
-		this.mapper = new ObjectMapper();
-		mapper.configure(Feature.IGNORE_UNKNOWN, true);
-
+		this.mapper = mapper;
 		this.enginePool = enginePool;
 		this.reloadScripts = reloadScripts;
 		this.finder = finder;

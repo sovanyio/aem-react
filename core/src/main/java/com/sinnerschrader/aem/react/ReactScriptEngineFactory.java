@@ -35,8 +35,10 @@ import org.apache.sling.models.factory.ModelFactory;
 import org.apache.sling.scripting.api.AbstractScriptEngineFactory;
 import org.osgi.service.component.ComponentContext;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sinnerschrader.aem.react.api.OsgiServiceFinder;
 import com.sinnerschrader.aem.react.exception.TechnicalException;
+import com.sinnerschrader.aem.react.json.ObjectMapperFactory;
 import com.sinnerschrader.aem.react.loader.HashedScript;
 import com.sinnerschrader.aem.react.loader.JcrResourceChangeListener;
 import com.sinnerschrader.aem.react.loader.ScriptCollectionLoader;
@@ -62,6 +64,8 @@ public class ReactScriptEngineFactory extends AbstractScriptEngineFactory {
 	public static final String PROPERTY_SCRIPTS_RELOAD = "scripts.reload";
 	public static final String PROPERTY_ROOT_ELEMENT_NAME = "root.element.name";
 	public static final String PROPERTY_ROOR_CLASS_NAME = "root.element.class.name";
+	public static final String JSON_RESOURCEMAPPING_INCLUDE_PATTERN = "json.resourcemapping.include.pattern";
+	public static final String JSON_RESOURCEMAPPING_EXCLUDE_PATTERN = "json.resourcemapping.include.pattern";
 
 	@Reference
 	private ServletResolver servletResolver;
@@ -173,9 +177,17 @@ public class ReactScriptEngineFactory extends AbstractScriptEngineFactory {
 				"");
 		JavacriptEnginePoolFactory javacriptEnginePoolFactory = new JavacriptEnginePoolFactory(
 				createLoader(scriptResources), null);
+
+		String includePattern = PropertiesUtil
+				.toString(context.getProperties().get(JSON_RESOURCEMAPPING_INCLUDE_PATTERN), "^/content");
+		String excludePattern = PropertiesUtil
+				.toString(context.getProperties().get(JSON_RESOURCEMAPPING_EXCLUDE_PATTERN), "^/content/dam");
+
+		ObjectMapper mapper = new ObjectMapperFactory().create(includePattern, excludePattern);
+
 		ObjectPool<JavascriptEngine> pool = createPool(poolTotalSize, javacriptEnginePoolFactory);
 		this.engine = new ReactScriptEngine(this, pool, isReloadScripts(context), finder, dynamicClassLoaderManager,
-				rootElementName, rootElementClassName, modelFactory);
+				rootElementName, rootElementClassName, modelFactory, mapper);
 		this.createScripts();
 
 		this.listener = new JcrResourceChangeListener(repositoryConnectionFactory,
