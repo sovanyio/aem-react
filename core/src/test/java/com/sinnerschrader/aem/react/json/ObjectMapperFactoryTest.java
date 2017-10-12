@@ -5,7 +5,6 @@ import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.sling.api.resource.ResourceResolver;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -42,7 +41,7 @@ public class ObjectMapperFactoryTest {
 	}
 
 	@Mock
-	private ResourceResolver resolver;
+	private ResourceMapper resourceMapper;
 
 	@Test
 	public void testUrlRewrite() throws JsonGenerationException, JsonMappingException, IOException {
@@ -66,11 +65,11 @@ public class ObjectMapperFactoryTest {
 
 		String text = "/content/sample/de/de";
 		Model model = new Model(text);
-		ResourceMapper.setInstance(resolver);
+		ResourceMapperLocator.setInstance(resourceMapper);
 		try {
 			mapper.writeValue(writer, model);
 		} finally {
-			ResourceMapper.clearInstance();
+			ResourceMapperLocator.clearInstance();
 		}
 		JsonNode resultingJson = mapper.readTree(writer.toString());
 		Assert.assertEquals(text, resultingJson.get("text").asText());
@@ -84,12 +83,12 @@ public class ObjectMapperFactoryTest {
 		Map<String, String> json = new HashMap<>();
 
 		json.put("url", url);
-		Mockito.when(resolver.map(Mockito.eq(url))).thenReturn(convertedUrl);
-		ResourceMapper.setInstance(resolver);
+		Mockito.when(resourceMapper.map(Mockito.eq(url))).thenReturn(convertedUrl);
+		ResourceMapperLocator.setInstance(resourceMapper);
 		try {
 			mapper.writeValue(writer, json);
 		} finally {
-			ResourceMapper.clearInstance();
+			ResourceMapperLocator.clearInstance();
 		}
 		JsonNode resultingJson = mapper.readTree(writer.toString());
 		Assert.assertEquals(convertedUrl, resultingJson.get("url").asText());

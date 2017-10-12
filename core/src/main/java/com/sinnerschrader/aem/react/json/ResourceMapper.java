@@ -1,21 +1,20 @@
 package com.sinnerschrader.aem.react.json;
 
+import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.ResourceResolver;
 
 public class ResourceMapper {
 
-	public static ThreadLocal<ResourceResolver> resourceResolver = new ThreadLocal<>();
+	private SlingHttpServletRequest request;
+	private ResourceResolver resolver;
 
-	public static ResourceResolver getInstance() {
-		return resourceResolver.get();
+	public ResourceMapper(SlingHttpServletRequest request) {
+		this.resolver = request.adaptTo(ResourceResolver.class);
+		this.request = request;
 	}
 
-	public static void setInstance(ResourceResolver resolver) {
-		resourceResolver.set(resolver);
-	}
-
-	public static void clearInstance() {
-		resourceResolver.remove();
+	public String map(String text) {
+		return resolver.map(request, text);
 	}
 
 }

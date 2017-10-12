@@ -3,7 +3,6 @@ package com.sinnerschrader.aem.react.json;
 import java.io.IOException;
 import java.util.regex.Pattern;
 
-import org.apache.sling.api.resource.ResourceResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,12 +33,12 @@ public class StringSerializer extends JsonSerializer<String> implements Contextu
 	public void serialize(String value, JsonGenerator gen, SerializerProvider serializers)
 			throws IOException, JsonProcessingException {
 		if (includePattern.matcher(value).find() && (excludePattern == null || !excludePattern.matcher(value).find())) {
-			ResourceResolver resolver = ResourceMapper.getInstance();
-			if (resolver == null) {
+			ResourceMapper mapper = ResourceMapperLocator.getInstance();
+			if (mapper == null) {
 				gen.writeString(value);
 				LOGGER.error("no instance of resourceResolver bound to thread");
 			} else {
-				gen.writeString(resolver.map(value));
+				gen.writeString(mapper.map(value));
 			}
 		} else {
 			gen.writeString(value);

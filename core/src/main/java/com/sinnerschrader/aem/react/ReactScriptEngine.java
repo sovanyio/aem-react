@@ -33,6 +33,8 @@ import com.sinnerschrader.aem.react.api.ModelFactory;
 import com.sinnerschrader.aem.react.api.OsgiServiceFinder;
 import com.sinnerschrader.aem.react.api.Sling;
 import com.sinnerschrader.aem.react.exception.TechnicalException;
+import com.sinnerschrader.aem.react.json.ResourceMapper;
+import com.sinnerschrader.aem.react.json.ResourceMapperLocator;
 
 public class ReactScriptEngine extends AbstractSlingScriptEngine {
 
@@ -90,7 +92,7 @@ public class ReactScriptEngine extends AbstractSlingScriptEngine {
 
 			Thread.currentThread().setContextClassLoader(((ReactScriptEngineFactory) getFactory()).getClassLoader());
 
-			Bindings bindings = scriptContext.getBindings(ScriptContext.ENGINE_SCOPE);
+			Bindings bindings = getBindings(scriptContext);
 			SlingScriptHelper sling = (SlingScriptHelper) bindings.get(SlingBindings.SLING);
 			SlingHttpServletRequest request = (SlingHttpServletRequest) bindings.get(SlingBindings.REQUEST);
 			SlingHttpServletResponse response = (SlingHttpServletResponse) bindings.get(SlingBindings.RESPONSE);
@@ -196,10 +198,8 @@ public class ReactScriptEngine extends AbstractSlingScriptEngine {
 	}
 
 	private Cqx createCqx(ScriptContext ctx) {
-		SlingHttpServletRequest request = (SlingHttpServletRequest) ctx.getBindings(ScriptContext.ENGINE_SCOPE)
-				.get(SlingBindings.REQUEST);
-		SlingScriptHelper sling = (SlingScriptHelper) ctx.getBindings(ScriptContext.ENGINE_SCOPE)
-				.get(SlingBindings.SLING);
+		SlingHttpServletRequest request = (SlingHttpServletRequest) getBindings(ctx).get(SlingBindings.REQUEST);
+		SlingScriptHelper sling = (SlingScriptHelper) getBindings(ctx).get(SlingBindings.SLING);
 
 		ClassLoader classLoader = dynamicClassLoaderManager.getDynamicClassLoader();
 		return new Cqx(new Sling(ctx), finder, new ModelFactory(classLoader, request, modelFactory),
@@ -219,6 +219,8 @@ public class ReactScriptEngine extends AbstractSlingScriptEngine {
 			ScriptContext scriptContext, boolean renderAsJson, Object reactContext) {
 		JavascriptEngine javascriptEngine;
 		try {
+			ResourceMapper resourceMapper = new ResourceMapper(getRequest(getBindings(scriptContext)));
+			ResourceMapperLocator.setInstance(resourceMapper);
 			javascriptEngine = enginePool.borrowObject();
 			try {
 				if (reloadScripts) {
@@ -237,8 +239,18 @@ public class ReactScriptEngine extends AbstractSlingScriptEngine {
 			throw new TechnicalException("cannot return engine from pool", e);
 		} catch (Exception e) {
 			throw new TechnicalException("error rendering react markup", e);
+		} finally {
+			ResourceMapperLocator.clearInstance();
 		}
 
+	}
+
+	private SlingHttpServletRequest getRequest(Bindings bindings) {
+		return (SlingHttpServletRequest) bindings.get(SlingBindings.REQUEST);
+	}
+
+	private Bindings getBindings(ScriptContext scriptContext) {
+		return scriptContext.getBindings(ScriptContext.ENGINE_SCOPE);
 	}
 
 	private String getWcmMode(SlingHttpServletRequest request) {
