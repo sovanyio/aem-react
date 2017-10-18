@@ -28,6 +28,7 @@ import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.apache.sling.api.adapter.AdapterManager;
 import org.apache.sling.api.servlets.ServletResolver;
 import org.apache.sling.commons.classloader.DynamicClassLoaderManager;
 import org.apache.sling.commons.osgi.PropertiesUtil;
@@ -81,6 +82,9 @@ public class ReactScriptEngineFactory extends AbstractScriptEngineFactory {
 
 	@Reference
 	private ScriptLoader scriptLoader;
+
+	@Reference
+	private AdapterManager adapterManager;
 
 	private static final String NASHORN_POLYFILL_JS = "nashorn-polyfill.js";
 
@@ -187,7 +191,7 @@ public class ReactScriptEngineFactory extends AbstractScriptEngineFactory {
 
 		ObjectPool<JavascriptEngine> pool = createPool(poolTotalSize, javacriptEnginePoolFactory);
 		this.engine = new ReactScriptEngine(this, pool, isReloadScripts(context), finder, dynamicClassLoaderManager,
-				rootElementName, rootElementClassName, modelFactory, mapper);
+				rootElementName, rootElementClassName, modelFactory, mapper, adapterManager);
 		this.createScripts();
 
 		this.listener = new JcrResourceChangeListener(repositoryConnectionFactory,

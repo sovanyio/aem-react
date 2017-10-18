@@ -2,8 +2,11 @@ package com.sinnerschrader.aem.react.api;
 
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.adapter.Adaptable;
+import org.apache.sling.api.adapter.AdapterManager;
+import org.apache.sling.api.request.RequestPathInfo;
 import org.apache.sling.api.resource.NonExistingResource;
 import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.scripting.SlingBindings;
 import org.apache.sling.api.wrappers.SlingHttpServletRequestWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,21 +20,117 @@ import org.slf4j.LoggerFactory;
  */
 public class ModelFactory {
 
+	private static final class ReactSlingRequest extends SlingHttpServletRequestWrapper {
+		private final Resource currentResource;
+		private final SlingBindings bindings;
+		private final String path;
+		private final AdapterManager adapterManager;
+
+		private ReactSlingRequest(AdapterManager adapterManager, SlingHttpServletRequest wrappedRequest,
+				Resource currentResource, SlingBindings bindings, String path) {
+			super(wrappedRequest);
+			this.currentResource = currentResource;
+			this.bindings = bindings;
+			this.path = path;
+			this.adapterManager = adapterManager;
+		}
+
+		@Override
+		public <AdapterType> AdapterType adaptTo(Class<AdapterType> type) {
+			return adapterManager.getAdapter(this, type);
+		}
+
+		@Override
+		public Object getAttribute(String name) {
+			if (SlingBindings.class.getName().equals(name)) {
+				return bindings;
+			}
+			return super.getAttribute(name);
+		}
+
+		@Override
+		public RequestPathInfo getRequestPathInfo() {
+			return new ResourcePathInfoWrapper(super.getRequestPathInfo(), path);
+		}
+
+		@Override
+		public Resource getResource() {
+
+			return currentResource;
+		}
+	}
+
+	private static class ResourcePathInfoWrapper implements RequestPathInfo {
+
+		private RequestPathInfo wrapped;
+
+		public ResourcePathInfoWrapper(RequestPathInfo wrapped, String path) {
+			super();
+			this.wrapped = wrapped;
+			this.path = path;
+		}
+
+		private String path;
+
+		@Override
+		public String getExtension() {
+			return wrapped.getExtension();
+		}
+
+		@Override
+		public String getSelectorString() {
+			return wrapped.getSelectorString();
+		}
+
+		@Override
+		public String[] getSelectors() {
+			return wrapped.getSelectors();
+		}
+
+		@Override
+		public String getSuffix() {
+			return wrapped.getSuffix();
+		}
+
+		@Override
+		public Resource getSuffixResource() {
+			return wrapped.getSuffixResource();
+		}
+
+		@Override
+		public String getResourcePath() {
+			return path;
+		}
+
+	}
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(ModelFactory.class);
 
 	private ClassLoader classLoader;
 
 	private org.apache.sling.models.factory.ModelFactory modelFactory;
 
+	private AdapterManager adapterManager;
+
 	public ModelFactory(ClassLoader classLoader, SlingHttpServletRequest request,
-			org.apache.sling.models.factory.ModelFactory modelFactory) {
+			org.apache.sling.models.factory.ModelFactory modelFactory, AdapterManager adapterManager) {
 		super();
 		this.classLoader = classLoader;
 		this.request = request;
 		this.modelFactory = modelFactory;
+		this.adapterManager = adapterManager;
 	}
 
 	private SlingHttpServletRequest request;
+
+	private Resource getResource(String path) {
+		final Resource currentResource = request.getResourceResolver().getResource(path);
+		if (currentResource == null) {
+			return new NonExistingResource(request.getResourceResolver(), path);
+		}
+		return currentResource;
+
+	}
 
 	/**
 	 * adapts the current request to the given class
@@ -41,19 +140,25 @@ public class ModelFactory {
 	 * @return
 	 */
 	public JsProxy createRequestModel(String path, String className) {
-		return createModel(className, new SlingHttpServletRequestWrapper(request) {
 
-			@Override
-			public Resource getResource() {
+		final Resource currentResource = getResource(path);
+		SlingBindings originalBindings = (SlingBindings) request.getAttribute(SlingBindings.class.getName());
+		SlingBindings bindings = new SlingBindings();
+		SlingHttpServletRequestWrapper newRequest = new ReactSlingRequest(adapterManager, request, currentResource,
+				bindings, path);
+		if (originalBindings != null) {
+			bindings.setFlush(originalBindings.getFlush());
+			bindings.setLog(originalBindings.getLog());
+			bindings.setOut(originalBindings.getOut());
+			bindings.setReader(originalBindings.getReader());
+			bindings.setRequest(newRequest);
+			bindings.setResource(currentResource);
+			bindings.setResponse(originalBindings.getResponse());
+			bindings.setSling(originalBindings.getSling());
 
-				Resource currentResource = request.getResourceResolver().getResource(path);
-				if (currentResource == null) {
-					return new NonExistingResource(request.getResourceResolver(), path);
-				}
-				return currentResource;
-			}
+		}
 
-		});
+		return createModel(className, newRequest);
 	}
 
 	/**

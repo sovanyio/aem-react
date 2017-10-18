@@ -14,6 +14,7 @@ import org.apache.commons.pool2.ObjectPool;
 import org.apache.jackrabbit.util.Text;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
+import org.apache.sling.api.adapter.AdapterManager;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.scripting.SlingBindings;
 import org.apache.sling.api.scripting.SlingScriptHelper;
@@ -55,6 +56,7 @@ public class ReactScriptEngine extends AbstractSlingScriptEngine {
 	private String rootElementName;
 	private String rootElementClass;
 	private org.apache.sling.models.factory.ModelFactory modelFactory;
+	private AdapterManager adapterManager;
 
 	/**
 	 * This class is the result of rendering a react component(-tree). It consists
@@ -72,9 +74,9 @@ public class ReactScriptEngine extends AbstractSlingScriptEngine {
 	protected ReactScriptEngine(ReactScriptEngineFactory scriptEngineFactory, ObjectPool<JavascriptEngine> enginePool,
 			boolean reloadScripts, OsgiServiceFinder finder, DynamicClassLoaderManager dynamicClassLoaderManager,
 			String rootElementName, String rootElementClass, org.apache.sling.models.factory.ModelFactory modelFactory,
-			ObjectMapper mapper) {
+			ObjectMapper mapper, AdapterManager adapterManager) {
 		super(scriptEngineFactory);
-
+		this.adapterManager = adapterManager;
 		this.mapper = mapper;
 		this.enginePool = enginePool;
 		this.reloadScripts = reloadScripts;
@@ -202,7 +204,7 @@ public class ReactScriptEngine extends AbstractSlingScriptEngine {
 		SlingScriptHelper sling = (SlingScriptHelper) getBindings(ctx).get(SlingBindings.SLING);
 
 		ClassLoader classLoader = dynamicClassLoaderManager.getDynamicClassLoader();
-		return new Cqx(new Sling(ctx), finder, new ModelFactory(classLoader, request, modelFactory),
+		return new Cqx(new Sling(ctx), finder, new ModelFactory(classLoader, request, modelFactory, adapterManager),
 				sling.getService(XSSAPI.class));
 	}
 
