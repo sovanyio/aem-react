@@ -45,10 +45,11 @@ public class JsProxy {
 	 * @return
 	 * @throws Exception
 	 */
-	public String invoke(String name, Object[] args) throws Exception {
+	public String invoke(String name, Object args) throws Exception {
+		Object[] javaArgs = (Object[]) jdk.nashorn.api.scripting.ScriptUtils.convert(args, Object[].class);
 		try {
 			Method method = methods.get(name);
-			Object returnValue = method.invoke(target, args);
+			Object returnValue = method.invoke(target, javaArgs);
 			StringWriter stringWriter = new StringWriter();
 			new ObjectMapper().writeValue(stringWriter, returnValue);
 			return stringWriter.toString();
