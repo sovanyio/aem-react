@@ -5,6 +5,11 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.script.ScriptContext;
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+import javax.script.ScriptException;
+
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,11 +50,10 @@ public class JsProxy {
 	 * @return
 	 * @throws Exception
 	 */
-	public String invoke(String name, Object args) throws Exception {
-		Object[] javaArgs = (Object[]) jdk.nashorn.api.scripting.ScriptUtils.convert(args, Object[].class);
+	public String invoke(String name, Object[] args) throws Exception {
 		try {
 			Method method = methods.get(name);
-			Object returnValue = method.invoke(target, javaArgs);
+			Object returnValue = method.invoke(target, args);
 			StringWriter stringWriter = new StringWriter();
 			new ObjectMapper().writeValue(stringWriter, returnValue);
 			return stringWriter.toString();
@@ -93,5 +97,28 @@ public class JsProxy {
 			LOGGER.error("cannot serialize object", e);
 			throw e;
 		}
+	}
+
+	public static class Api {
+		public void execute(Object arg) {
+			System.out.println(arg);
+		}
+	}
+
+	public static void main(String[] args) throws ScriptException {
+		String script = "var ObjectArray = Java.type('java.util.ArrayList');\n"//
+				+ "    var argsArray = new ObjectArray();\n" //
+				+ "    argsArray.add(1);\n"//
+				+ "    argsArray.add('hallo');\n"//
+				+ " api.execute(argsArray)";
+		String script2 = "var ObjectArray = Java.type('java.lang.Object[]');\n"//
+				+ "    var argsArray = new ObjectArray(2);\n" //
+				+ "    argsArray[0]=1;\n"//
+				+ "    argsArray[1]='hallo';\n"//
+				+ " api.execute(argsArray)";
+		ScriptEngineManager scriptEngineManager = new ScriptEngineManager();
+		ScriptEngine engine = scriptEngineManager.getEngineByName("nashorn");
+		engine.getContext().getBindings(ScriptContext.GLOBAL_SCOPE).put("api", new Api());
+		Object eval = engine.eval(script2);
 	}
 }
