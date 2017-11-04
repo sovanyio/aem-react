@@ -28,7 +28,6 @@ import org.slf4j.LoggerFactory;
 
 import com.adobe.granite.xss.XSSAPI;
 import com.day.cq.wcm.api.WCMMode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sinnerschrader.aem.react.api.Cqx;
 import com.sinnerschrader.aem.react.api.ModelFactory;
 import com.sinnerschrader.aem.react.api.OsgiServiceFinder;
@@ -49,8 +48,6 @@ public class ReactScriptEngine extends AbstractSlingScriptEngine {
 	private static final String SERVER_RENDERING_PARAM = "serverRendering";
 	private static final Logger LOG = LoggerFactory.getLogger(ReactScriptEngine.class);
 	private ObjectPool<JavascriptEngine> enginePool;
-	private boolean reloadScripts;
-	private ObjectMapper mapper;
 	private OsgiServiceFinder finder;
 	private DynamicClassLoaderManager dynamicClassLoaderManager;
 	private String rootElementName;
@@ -72,14 +69,12 @@ public class ReactScriptEngine extends AbstractSlingScriptEngine {
 	}
 
 	protected ReactScriptEngine(ReactScriptEngineFactory scriptEngineFactory, ObjectPool<JavascriptEngine> enginePool,
-			boolean reloadScripts, OsgiServiceFinder finder, DynamicClassLoaderManager dynamicClassLoaderManager,
-			String rootElementName, String rootElementClass, org.apache.sling.models.factory.ModelFactory modelFactory,
-			ObjectMapper mapper, AdapterManager adapterManager) {
+			OsgiServiceFinder finder, DynamicClassLoaderManager dynamicClassLoaderManager, String rootElementName,
+			String rootElementClass, org.apache.sling.models.factory.ModelFactory modelFactory,
+			AdapterManager adapterManager) {
 		super(scriptEngineFactory);
 		this.adapterManager = adapterManager;
-		this.mapper = mapper;
 		this.enginePool = enginePool;
-		this.reloadScripts = reloadScripts;
 		this.finder = finder;
 		this.dynamicClassLoaderManager = dynamicClassLoaderManager;
 		this.rootElementName = rootElementName;
@@ -204,8 +199,8 @@ public class ReactScriptEngine extends AbstractSlingScriptEngine {
 		SlingScriptHelper sling = (SlingScriptHelper) getBindings(ctx).get(SlingBindings.SLING);
 
 		ClassLoader classLoader = dynamicClassLoaderManager.getDynamicClassLoader();
-		return new Cqx(new Sling(ctx), finder, new ModelFactory(classLoader, request, modelFactory, adapterManager),
-				sling.getService(XSSAPI.class));
+		ModelFactory reactModelFactory = new ModelFactory(classLoader, request, modelFactory, adapterManager);
+		return new Cqx(new Sling(ctx), finder, reactModelFactory, sling.getService(XSSAPI.class));
 	}
 
 	/**
@@ -225,8 +220,10 @@ public class ReactScriptEngine extends AbstractSlingScriptEngine {
 			ResourceMapperLocator.setInstance(resourceMapper);
 			javascriptEngine = enginePool.borrowObject();
 			try {
-				if (reloadScripts) {
-					javascriptEngine.reloadScripts();
+				while (javascriptEngine.isScriptsChanged()) {
+					LOG.info("scripts changed -> invalidate engine");
+					enginePool.invalidateObject(javascriptEngine);
+					javascriptEngine = enginePool.borrowObject();
 				}
 				return javascriptEngine.render(path, resourceType, wcmmode, createCqx(scriptContext), renderAsJson,
 						reactContext);
@@ -236,6 +233,7 @@ public class ReactScriptEngine extends AbstractSlingScriptEngine {
 
 			}
 		} catch (NoSuchElementException e) {
+			LOG.info("engine pool exhausted");
 			throw new TechnicalException("cannot get engine from pool", e);
 		} catch (IllegalStateException e) {
 			throw new TechnicalException("cannot return engine from pool", e);

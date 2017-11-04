@@ -62,11 +62,11 @@ public class JavascriptEngine {
 		}
 
 		public void error(String statement) {
-      LOGGER.error(statement);
+			LOGGER.error(statement);
 		}
 
 		public void error(String statement, Object error) {
-      LOGGER.error(statement, error);
+			LOGGER.error(statement, error);
 		}
 
 		public void warn(String statement) {
@@ -82,7 +82,7 @@ public class JavascriptEngine {
 	public static class Print extends Writer {
 		@Override
 		public void write(char[] cbuf, int off, int len) throws IOException {
-      LOGGER.error(new String(cbuf, off, len));
+			LOGGER.error(new String(cbuf, off, len));
 		}
 
 		@Override
@@ -189,6 +189,20 @@ public class JavascriptEngine {
 
 	public void reloadScripts() {
 		updateJavascriptLibrary();
+
+	}
+
+	public boolean isScriptsChanged() {
+		Iterator<HashedScript> iterator = loader.iterator();
+		boolean reload = false;
+		while (iterator.hasNext()) {
+			HashedScript next = iterator.next();
+			String checksum = scriptChecksums.get(next.getId());
+			if (!checksum.equals(next.getChecksum())) {
+				return true;
+			}
+		}
+		return false;
 
 	}
 

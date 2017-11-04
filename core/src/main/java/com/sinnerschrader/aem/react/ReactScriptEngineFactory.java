@@ -53,20 +53,20 @@ import com.sinnerschrader.aem.react.repo.RepositoryConnectionFactory;
 		@Property(name = ReactScriptEngineFactory.PROPERTY_SCRIPTS_PATHS, label = "the jcr paths to the scripts libraries", value = {}, cardinality = Integer.MAX_VALUE), //
 		@Property(name = ReactScriptEngineFactory.PROPERTY_SUBSERVICENAME, label = "the subservicename for accessing the script resources. If it is null then the deprecated system admin will be used.", value = ""), //
 		@Property(name = ReactScriptEngineFactory.PROPERTY_POOL_TOTAL_SIZE, label = "total javascript engine pool size", longValue = 20), //
-		@Property(name = ReactScriptEngineFactory.PROPERTY_SCRIPTS_RELOAD, label = "reload library scripts when they were modified", boolValue = true), //
 		@Property(name = ReactScriptEngineFactory.PROPERTY_ROOT_ELEMENT_NAME, label = "the root element name of the", value = "div"), //
-		@Property(name = ReactScriptEngineFactory.PROPERTY_ROOR_CLASS_NAME, label = "the root element class name", value = ""),//
+		@Property(name = ReactScriptEngineFactory.PROPERTY_ROOR_CLASS_NAME, label = "the root element class name", value = ""), //
+		@Property(name = ReactScriptEngineFactory.JSON_RESOURCEMAPPING_INCLUDE_PATTERN, label = "pattern for text properties in sling models that must be mapped by resource resover", value = "^/content"), //
+		@Property(name = ReactScriptEngineFactory.JSON_RESOURCEMAPPING_EXCLUDE_PATTERN, label = "pattern to include properties from resource mapping", value = "") //
 })
 public class ReactScriptEngineFactory extends AbstractScriptEngineFactory {
 
 	public static final String PROPERTY_SCRIPTS_PATHS = "scripts.paths";
 	public static final String PROPERTY_SUBSERVICENAME = "subServiceName";
 	public static final String PROPERTY_POOL_TOTAL_SIZE = "pool.total.size";
-	public static final String PROPERTY_SCRIPTS_RELOAD = "scripts.reload";
 	public static final String PROPERTY_ROOT_ELEMENT_NAME = "root.element.name";
 	public static final String PROPERTY_ROOR_CLASS_NAME = "root.element.class.name";
 	public static final String JSON_RESOURCEMAPPING_INCLUDE_PATTERN = "json.resourcemapping.include.pattern";
-	public static final String JSON_RESOURCEMAPPING_EXCLUDE_PATTERN = "json.resourcemapping.include.pattern";
+	public static final String JSON_RESOURCEMAPPING_EXCLUDE_PATTERN = "json.resourcemapping.exclude.pattern";
 
 	@Reference
 	private ServletResolver servletResolver;
@@ -164,11 +164,6 @@ public class ReactScriptEngineFactory extends AbstractScriptEngineFactory {
 		return "1.0.0";
 	}
 
-	protected boolean isReloadScripts(final ComponentContext context) {
-		return PropertiesUtil.toBoolean(context.getProperties().get(PROPERTY_SCRIPTS_RELOAD), true);
-
-	}
-
 	@Activate
 	public void initialize(final ComponentContext context, Map<String, Object> properties) {
 		this.subServiceName = PropertiesUtil.toString(context.getProperties().get(PROPERTY_SUBSERVICENAME), "");
@@ -185,13 +180,13 @@ public class ReactScriptEngineFactory extends AbstractScriptEngineFactory {
 		String includePattern = PropertiesUtil
 				.toString(context.getProperties().get(JSON_RESOURCEMAPPING_INCLUDE_PATTERN), "^/content");
 		String excludePattern = PropertiesUtil
-				.toString(context.getProperties().get(JSON_RESOURCEMAPPING_EXCLUDE_PATTERN), "^/content/dam");
+				.toString(context.getProperties().get(JSON_RESOURCEMAPPING_EXCLUDE_PATTERN), null);
 
 		ObjectMapper mapper = new ObjectMapperFactory().create(includePattern, excludePattern);
 
 		ObjectPool<JavascriptEngine> pool = createPool(poolTotalSize, javacriptEnginePoolFactory);
-		this.engine = new ReactScriptEngine(this, pool, isReloadScripts(context), finder, dynamicClassLoaderManager,
-				rootElementName, rootElementClassName, modelFactory, mapper, adapterManager);
+		this.engine = new ReactScriptEngine(this, pool, finder, dynamicClassLoaderManager, rootElementName,
+				rootElementClassName, modelFactory, adapterManager);
 		this.createScripts();
 
 		this.listener = new JcrResourceChangeListener(repositoryConnectionFactory,
