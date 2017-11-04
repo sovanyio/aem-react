@@ -28,6 +28,7 @@ import org.slf4j.LoggerFactory;
 
 import com.adobe.granite.xss.XSSAPI;
 import com.day.cq.wcm.api.WCMMode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sinnerschrader.aem.react.api.Cqx;
 import com.sinnerschrader.aem.react.api.ModelFactory;
 import com.sinnerschrader.aem.react.api.OsgiServiceFinder;
@@ -54,6 +55,7 @@ public class ReactScriptEngine extends AbstractSlingScriptEngine {
 	private String rootElementClass;
 	private org.apache.sling.models.factory.ModelFactory modelFactory;
 	private AdapterManager adapterManager;
+	private ObjectMapper mapper;
 
 	/**
 	 * This class is the result of rendering a react component(-tree). It consists
@@ -71,7 +73,7 @@ public class ReactScriptEngine extends AbstractSlingScriptEngine {
 	protected ReactScriptEngine(ReactScriptEngineFactory scriptEngineFactory, ObjectPool<JavascriptEngine> enginePool,
 			OsgiServiceFinder finder, DynamicClassLoaderManager dynamicClassLoaderManager, String rootElementName,
 			String rootElementClass, org.apache.sling.models.factory.ModelFactory modelFactory,
-			AdapterManager adapterManager) {
+			AdapterManager adapterManager, ObjectMapper mapper) {
 		super(scriptEngineFactory);
 		this.adapterManager = adapterManager;
 		this.enginePool = enginePool;
@@ -80,6 +82,7 @@ public class ReactScriptEngine extends AbstractSlingScriptEngine {
 		this.rootElementName = rootElementName;
 		this.rootElementClass = rootElementClass;
 		this.modelFactory = modelFactory;
+		this.mapper = mapper;
 	}
 
 	@Override
@@ -199,8 +202,8 @@ public class ReactScriptEngine extends AbstractSlingScriptEngine {
 		SlingScriptHelper sling = (SlingScriptHelper) getBindings(ctx).get(SlingBindings.SLING);
 
 		ClassLoader classLoader = dynamicClassLoaderManager.getDynamicClassLoader();
-		ModelFactory reactModelFactory = new ModelFactory(classLoader, request, modelFactory, adapterManager);
-		return new Cqx(new Sling(ctx), finder, reactModelFactory, sling.getService(XSSAPI.class));
+		ModelFactory reactModelFactory = new ModelFactory(classLoader, request, modelFactory, adapterManager, mapper);
+		return new Cqx(new Sling(ctx), finder, reactModelFactory, sling.getService(XSSAPI.class), mapper);
 	}
 
 	/**

@@ -5,11 +5,6 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.script.ScriptContext;
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
-import javax.script.ScriptException;
-
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,8 +28,11 @@ public class JsProxy {
 
 	private Map<String, Method> methods = new HashMap<>();
 
-	public JsProxy(Object target, Class<?> clazz) {
+	private ObjectMapper mapper;
+
+	public JsProxy(Object target, Class<?> clazz, ObjectMapper mapper) {
 		super();
+		this.mapper = mapper;
 		this.target = target;
 		for (Method m : clazz.getMethods()) {
 			methods.put(m.getName(), m);
@@ -55,7 +53,7 @@ public class JsProxy {
 			Method method = methods.get(name);
 			Object returnValue = method.invoke(target, args);
 			StringWriter stringWriter = new StringWriter();
-			new ObjectMapper().writeValue(stringWriter, returnValue);
+			mapper.writeValue(stringWriter, returnValue);
 			return stringWriter.toString();
 		} catch (Exception e) {
 			LOGGER.error("cannot invoke proxied method " + name, e);
@@ -75,7 +73,7 @@ public class JsProxy {
 			Method method = methods.get("get" + StringUtils.capitalize(name));
 			Object returnValue = method.invoke(target, new Object[0]);
 			StringWriter stringWriter = new StringWriter();
-			new ObjectMapper().writeValue(stringWriter, returnValue);
+			mapper.writeValue(stringWriter, returnValue);
 			return stringWriter.toString();
 		} catch (Exception e) {
 			LOGGER.error("cannot invoke proxied method " + name, e);
@@ -91,7 +89,7 @@ public class JsProxy {
 	public String getObject() throws Exception {
 		try {
 			StringWriter stringWriter = new StringWriter();
-			new ObjectMapper().writeValue(stringWriter, target);
+			mapper.writeValue(stringWriter, target);
 			return stringWriter.toString();
 		} catch (Exception e) {
 			LOGGER.error("cannot serialize object", e);
@@ -105,20 +103,4 @@ public class JsProxy {
 		}
 	}
 
-	public static void main(String[] args) throws ScriptException {
-		String script = "var ObjectArray = Java.type('java.util.ArrayList');\n"//
-				+ "    var argsArray = new ObjectArray();\n" //
-				+ "    argsArray.add(1);\n"//
-				+ "    argsArray.add('hallo');\n"//
-				+ " api.execute(argsArray)";
-		String script2 = "var ObjectArray = Java.type('java.lang.Object[]');\n"//
-				+ "    var argsArray = new ObjectArray(2);\n" //
-				+ "    argsArray[0]=1;\n"//
-				+ "    argsArray[1]='hallo';\n"//
-				+ " api.execute(argsArray)";
-		ScriptEngineManager scriptEngineManager = new ScriptEngineManager();
-		ScriptEngine engine = scriptEngineManager.getEngineByName("nashorn");
-		engine.getContext().getBindings(ScriptContext.GLOBAL_SCOPE).put("api", new Api());
-		Object eval = engine.eval(script2);
-	}
 }

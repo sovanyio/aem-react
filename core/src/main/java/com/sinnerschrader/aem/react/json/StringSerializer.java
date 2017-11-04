@@ -3,6 +3,7 @@ package com.sinnerschrader.aem.react.json;
 import java.io.IOException;
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,7 +21,7 @@ public class StringSerializer extends JsonSerializer<String> implements Contextu
 
 	public StringSerializer(String includePattern, String excludePattern) {
 		this.includePattern = Pattern.compile(includePattern);
-		if (excludePattern != null) {
+		if (StringUtils.isNotEmpty(excludePattern)) {
 			this.excludePattern = Pattern.compile(excludePattern);
 		}
 	}

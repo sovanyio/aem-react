@@ -9,7 +9,7 @@ public class ResourceMapper {
 	private ResourceResolver resolver;
 
 	public ResourceMapper(SlingHttpServletRequest request) {
-		this.resolver = request.adaptTo(ResourceResolver.class);
+		this.resolver = request.getResourceResolver();
 		this.request = request;
 	}
 

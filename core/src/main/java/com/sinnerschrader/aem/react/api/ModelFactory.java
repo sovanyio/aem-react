@@ -11,6 +11,8 @@ import org.apache.sling.api.wrappers.SlingHttpServletRequestWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 /**
  *
  * This class adapts objects to a target class.
@@ -112,19 +114,23 @@ public class ModelFactory {
 
 	private AdapterManager adapterManager;
 
+	private ObjectMapper mapper;
+
 	public ModelFactory(ClassLoader classLoader, SlingHttpServletRequest request,
-			org.apache.sling.models.factory.ModelFactory modelFactory, AdapterManager adapterManager) {
+			org.apache.sling.models.factory.ModelFactory modelFactory, AdapterManager adapterManager,
+			ObjectMapper mapper) {
 		super();
 		this.classLoader = classLoader;
 		this.request = request;
 		this.modelFactory = modelFactory;
 		this.adapterManager = adapterManager;
+		this.mapper = mapper;
 	}
 
 	private SlingHttpServletRequest request;
 
 	private Resource getResource(String path) {
-		final Resource currentResource = request.getResourceResolver().getResource(path);
+		final Resource currentResource = request.getResourceResolver().resolve(path);
 		if (currentResource == null) {
 			return new NonExistingResource(request.getResourceResolver(), path);
 		}
@@ -169,8 +175,11 @@ public class ModelFactory {
 	 * @return
 	 */
 	public JsProxy createResourceModel(String path, String className) {
-
-		return createModel(className, request.getResourceResolver().getResource(path));
+		Resource resource = request.getResourceResolver().resolve(path);
+		if (resource == null) {
+			return null;
+		}
+		return createModel(className, resource);
 	}
 
 	private JsProxy createModel(String className, Adaptable adaptable) {
@@ -187,7 +196,7 @@ public class ModelFactory {
 		if (object == null) {
 			return null;
 		}
-		return new JsProxy(object, clazz);
+		return new JsProxy(object, clazz, mapper);
 	}
 
 }

@@ -186,7 +186,7 @@ public class ReactScriptEngineFactory extends AbstractScriptEngineFactory {
 
 		ObjectPool<JavascriptEngine> pool = createPool(poolTotalSize, javacriptEnginePoolFactory);
 		this.engine = new ReactScriptEngine(this, pool, finder, dynamicClassLoaderManager, rootElementName,
-				rootElementClassName, modelFactory, adapterManager);
+				rootElementClassName, modelFactory, adapterManager, mapper);
 		this.createScripts();
 
 		this.listener = new JcrResourceChangeListener(repositoryConnectionFactory,

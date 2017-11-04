@@ -1,6 +1,7 @@
 package com.sinnerschrader.aem.react.api;
 
 import com.adobe.granite.xss.XSSAPI;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  *
@@ -15,13 +16,15 @@ public class Cqx {
 	private OsgiServiceFinder finder;
 	private ModelFactory modelFactory;
 	private XSSAPI xssApi;
+	private ObjectMapper mapper;
 
-	public Cqx(Sling sling, OsgiServiceFinder finder, ModelFactory modelFactory, XSSAPI xssApi) {
+	public Cqx(Sling sling, OsgiServiceFinder finder, ModelFactory modelFactory, XSSAPI xssApi, ObjectMapper mapper) {
 		super();
 		this.sling = sling;
 		this.finder = finder;
 		this.modelFactory = modelFactory;
 		this.xssApi = xssApi;
+		this.mapper = mapper;
 	}
 
 	/**
@@ -32,7 +35,7 @@ public class Cqx {
 	 * @return
 	 */
 	public JsProxy getOsgiService(String name) {
-		return finder.get(name);
+		return finder.get(name, mapper);
 	}
 
 	/**

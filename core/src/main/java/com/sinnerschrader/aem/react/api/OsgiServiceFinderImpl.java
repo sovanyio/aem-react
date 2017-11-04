@@ -6,25 +6,27 @@ import org.apache.felix.scr.annotations.Service;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 @Component
 @Service
 public class OsgiServiceFinderImpl implements OsgiServiceFinder {
 
-  private BundleContext bundleContext;
+	private BundleContext bundleContext;
 
-  @Activate
-  public void initialize(BundleContext abundleContext) {
-    this.bundleContext = abundleContext;
-  }
+	@Activate
+	public void initialize(BundleContext abundleContext) {
+		this.bundleContext = abundleContext;
+	}
 
-  @Override
-  public JsProxy get(String className) {
-    ServiceReference serviceReference = bundleContext.getServiceReference(className);
-    if (serviceReference == null) {
-      return null;
-    }
-    Object service = bundleContext.getService(serviceReference);
-    return new JsProxy(service, service.getClass());
-  }
+	@Override
+	public JsProxy get(String className, ObjectMapper mapper) {
+		ServiceReference serviceReference = bundleContext.getServiceReference(className);
+		if (serviceReference == null) {
+			return null;
+		}
+		Object service = bundleContext.getService(serviceReference);
+		return new JsProxy(service, service.getClass(), mapper);
+	}
 
 }
