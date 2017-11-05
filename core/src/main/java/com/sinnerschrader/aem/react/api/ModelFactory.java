@@ -130,7 +130,8 @@ public class ModelFactory {
 	private SlingHttpServletRequest request;
 
 	private Resource getResource(String path) {
-		final Resource currentResource = request.getResourceResolver().resolve(path);
+		final Resource currentResource = request.getResourceResolver().resolve(request, path);
+
 		if (currentResource == null) {
 			return new NonExistingResource(request.getResourceResolver(), path);
 		}

@@ -301,11 +301,9 @@ public class Sling {
 
 			String script = normalizePath(request, path);
 
-			Resource includeRes = request.getResourceResolver().resolve(script);
+			Resource includeRes = request.getResourceResolver().resolve(request, script);
 			if (includeRes instanceof NonExistingResource
 					|| includeRes.isResourceType(Resource.RESOURCE_TYPE_NON_EXISTING)) {
-				includeRes = new SyntheticResource(request.getResourceResolver(), script, resourceType);
-			} else if (!includeRes.getPath().equals(script)) {
 				includeRes = new SyntheticResource(request.getResourceResolver(), script, resourceType);
 			}
 			try {
