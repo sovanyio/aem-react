@@ -35,6 +35,8 @@ import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.apache.sling.models.factory.ModelFactory;
 import org.apache.sling.scripting.api.AbstractScriptEngineFactory;
 import org.osgi.service.component.ComponentContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sinnerschrader.aem.react.api.OsgiServiceFinder;
@@ -97,6 +99,8 @@ public class ReactScriptEngineFactory extends AbstractScriptEngineFactory {
 	private JcrResourceChangeListener listener;
 	private String subServiceName;
 
+	private static Logger LOGGER = LoggerFactory.getLogger(ReactScriptEngineFactory.class);
+
 	@Reference
 	private RepositoryConnectionFactory repositoryConnectionFactory;
 
@@ -111,15 +115,15 @@ public class ReactScriptEngineFactory extends AbstractScriptEngineFactory {
 		}
 		try {
 			newScripts.add(createHashedScript("polyFillUrl", new InputStreamReader(polyFillUrl.openStream(), "UTF-8")));
-		} catch (IOException e) {
+		} catch (IOException | TechnicalException e) {
 			throw new TechnicalException("cannot open stream to " + polyFillUrl, e);
 		}
 
 		for (String scriptResource : scriptResources) {
 			try (Reader reader = scriptLoader.loadJcrScript(scriptResource, subServiceName)) {
 				newScripts.add(createHashedScript(scriptResource, reader));
-			} catch (IOException e) {
-				throw new TechnicalException("cannot load jcr script " + scriptResource, e);
+			} catch (TechnicalException | IOException e) {
+				LOGGER.error("cannot load script resources", e);
 			}
 		}
 		this.scripts = newScripts;
@@ -195,6 +199,7 @@ public class ReactScriptEngineFactory extends AbstractScriptEngineFactory {
 					public void changed(String script) {
 						createScripts();
 					}
+
 				}, subServiceName);
 		this.listener.activate(scriptResources);
 

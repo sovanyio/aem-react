@@ -37,8 +37,8 @@ public class JavascriptEngine {
 	private static final Logger LOGGER = LoggerFactory.getLogger(JavascriptEngine.class);
 
 	public static class Console {
-		public void debug(String statement) {
-			LOGGER.debug(statement);
+		public void debug(String statement, Object... args) {
+			LOGGER.debug(statement, args);
 		}
 
 		public void debug(String statement, Object error) {

@@ -232,7 +232,13 @@ public class ReactScriptEngine extends AbstractSlingScriptEngine {
 						reactContext);
 			} finally {
 
-				enginePool.returnObject(javascriptEngine);
+				try {
+					if (javascriptEngine != null) {
+						enginePool.returnObject(javascriptEngine);
+					}
+				} catch (IllegalStateException e) {
+					// returned object that is not in the pool any more
+				}
 
 			}
 		} catch (NoSuchElementException e) {
