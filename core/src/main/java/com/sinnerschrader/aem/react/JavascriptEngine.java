@@ -198,7 +198,7 @@ public class JavascriptEngine {
 		while (iterator.hasNext()) {
 			HashedScript next = iterator.next();
 			String checksum = scriptChecksums.get(next.getId());
-			if (!checksum.equals(next.getChecksum())) {
+			if (checksum==null || !checksum.equals(next.getChecksum())) {
 				return true;
 			}
 		}
