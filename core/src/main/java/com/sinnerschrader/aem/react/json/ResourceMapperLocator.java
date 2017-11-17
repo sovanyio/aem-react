@@ -8,8 +8,12 @@ public class ResourceMapperLocator {
 		return mapperHolder.get();
 	}
 
-	public static void setInstance(ResourceMapper mapper) {
+	public static boolean setInstance(ResourceMapper mapper) {
+		if (getInstance()!=null) {
+			return false;
+		}
 		mapperHolder.set(mapper);
+		return true;
 	}
 
 	public static void clearInstance() {
