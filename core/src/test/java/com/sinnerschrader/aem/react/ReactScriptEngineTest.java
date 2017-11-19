@@ -14,6 +14,7 @@ import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.request.RequestPathInfo;
 import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.scripting.SlingBindings;
 import org.apache.sling.api.scripting.SlingScriptHelper;
 import org.apache.sling.commons.classloader.DynamicClassLoaderManager;
@@ -42,6 +43,9 @@ public class ReactScriptEngineTest {
 
 	@Mock
 	private ReactScriptEngineFactory factory;
+
+	@Mock
+	private ResourceResolver resourceResolver;
 
 	@Mock
 	private ClassLoader classLoader;
@@ -95,6 +99,7 @@ public class ReactScriptEngineTest {
 		bindings.put(SlingBindings.REQUEST, request);
 		bindings.put(SlingBindings.RESPONSE, response);
 		bindings.put(SlingBindings.SLING, sling);
+		Mockito.when(request.getResourceResolver()).thenReturn(resourceResolver);
 		Mockito.when(request.getRequestPathInfo()).thenReturn(info);
 		Mockito.when(info.getSelectors()).thenReturn(new String[0]);
 
@@ -106,6 +111,7 @@ public class ReactScriptEngineTest {
 		String resourceType = "/apps/test";
 		Mockito.when(resource.getResourceType()).thenReturn(resourceType);
 		String path = "/content/page/test";
+		Mockito.when(resourceResolver.map(path)).thenReturn(path);
 		Mockito.when(resource.getPath()).thenReturn(path);
 		Mockito.when(request.getResource()).thenReturn(resource);
 

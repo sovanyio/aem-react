@@ -117,9 +117,11 @@ public class ReactScriptEngine extends AbstractSlingScriptEngine {
 			String renderedHtml;
 			boolean serverRendering = !SERVER_RENDERING_DISABLED.equals(request.getParameter(SERVER_RENDERING_PARAM));
 			String cacheString = null;
+			String path = resource.getPath();
+			String mappedPath = request.getResourceResolver().map(path);
 			if (serverRendering) {
 				final Object reactContext = request.getAttribute(REACT_CONTEXT_KEY);
-				RenderResult result = renderReactMarkup(resource.getPath(), resource.getResourceType(),
+				RenderResult result = renderReactMarkup(mappedPath, resource.getResourceType(),
 						getWcmMode(request), scriptContext, renderAsJson, reactContext);
 				renderedHtml = result.html;
 				cacheString = result.cache;
@@ -133,7 +135,7 @@ public class ReactScriptEngine extends AbstractSlingScriptEngine {
 				resourceEntry.put("depth", -1);
 				// depth is inaccurate
 				resourceEntry.put("data", JsonObjectCreator.create(resource, -1));
-				resources.put(resource.getPath(), resourceEntry);
+				resources.put(mappedPath, resourceEntry);
 				cache.put("resources", resources);
 				cacheString = cache.toString();
 				renderedHtml = "";
@@ -147,7 +149,7 @@ public class ReactScriptEngine extends AbstractSlingScriptEngine {
 				output = cacheString;
 				response.setContentType("application/json");
 			} else {
-				output = wrapHtml(resource.getPath(), resource, renderedHtml, serverRendering, getWcmMode(request),
+				output = wrapHtml(mappedPath, resource, renderedHtml, serverRendering, getWcmMode(request),
 						cacheString);
 
 			}
@@ -174,7 +176,7 @@ public class ReactScriptEngine extends AbstractSlingScriptEngine {
 	 * @param serverRendering
 	 * @return
 	 */
-	String wrapHtml(String path, Resource resource, String renderedHtml, boolean serverRendering, String wcmmode,
+	String wrapHtml(String mappedPath, Resource resource, String renderedHtml, boolean serverRendering, String wcmmode,
 			String cache) {
 		JSONObject reactProps = new JSONObject();
 		try {
@@ -182,7 +184,7 @@ public class ReactScriptEngine extends AbstractSlingScriptEngine {
 				reactProps.put("cache", new JSONObject(cache));
 			}
 			reactProps.put("resourceType", resource.getResourceType());
-			reactProps.put("path", resource.getPath());
+			reactProps.put("path", mappedPath);
 			reactProps.put("wcmmode", wcmmode);
 		} catch (JSONException e) {
 			throw new TechnicalException("cannot create react props", e);
@@ -190,8 +192,8 @@ public class ReactScriptEngine extends AbstractSlingScriptEngine {
 		String jsonProps = StringEscapeUtils.escapeHtml4(reactProps.toString());
 		String classString = (StringUtils.isNotEmpty(rootElementClass)) ? " class=\"" + rootElementClass + "\"" : "";
 		String allHtml = "<" + rootElementName + " " + classString + " data-react-server=\""
-				+ String.valueOf(serverRendering) + "\" data-react=\"app\" data-react-id=\"" + path + "_component\">"
-				+ renderedHtml + "</" + rootElementName + ">" + "<textarea id=\"" + path
+				+ String.valueOf(serverRendering) + "\" data-react=\"app\" data-react-id=\"" + mappedPath + "_component\">"
+				+ renderedHtml + "</" + rootElementName + ">" + "<textarea id=\"" + mappedPath
 				+ "_component\" style=\"display:none;\">" + jsonProps + "</textarea>";
 
 		return allHtml;
@@ -215,12 +217,14 @@ public class ReactScriptEngine extends AbstractSlingScriptEngine {
 	 *            component name
 	 * @return
 	 */
-	private RenderResult renderReactMarkup(String path, String resourceType, String wcmmode,
+	private RenderResult renderReactMarkup(String mappedPath, String resourceType, String wcmmode,
 			ScriptContext scriptContext, boolean renderAsJson, Object reactContext) {
 		JavascriptEngine javascriptEngine;
+		boolean removeMapper=false;
 		try {
-			ResourceMapper resourceMapper = new ResourceMapper(getRequest(getBindings(scriptContext)));
-			ResourceMapperLocator.setInstance(resourceMapper);
+			SlingHttpServletRequest request = getRequest(getBindings(scriptContext));
+			ResourceMapper resourceMapper = new ResourceMapper(request);
+			removeMapper = ResourceMapperLocator.setInstance(resourceMapper);
 			javascriptEngine = enginePool.borrowObject();
 			try {
 				while (javascriptEngine.isScriptsChanged()) {
@@ -228,7 +232,7 @@ public class ReactScriptEngine extends AbstractSlingScriptEngine {
 					enginePool.invalidateObject(javascriptEngine);
 					javascriptEngine = enginePool.borrowObject();
 				}
-				return javascriptEngine.render(path, resourceType, wcmmode, createCqx(scriptContext), renderAsJson,
+				return javascriptEngine.render(mappedPath, resourceType, wcmmode, createCqx(scriptContext), renderAsJson,
 						reactContext);
 			} finally {
 
@@ -249,7 +253,9 @@ public class ReactScriptEngine extends AbstractSlingScriptEngine {
 		} catch (Exception e) {
 			throw new TechnicalException("error rendering react markup", e);
 		} finally {
-			ResourceMapperLocator.clearInstance();
+			if (removeMapper) {
+				ResourceMapperLocator.clearInstance();
+			}
 		}
 
 	}

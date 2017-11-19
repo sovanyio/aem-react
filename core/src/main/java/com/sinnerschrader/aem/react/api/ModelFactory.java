@@ -152,7 +152,7 @@ public class ModelFactory {
 		SlingBindings originalBindings = (SlingBindings) request.getAttribute(SlingBindings.class.getName());
 		SlingBindings bindings = new SlingBindings();
 		SlingHttpServletRequestWrapper newRequest = new ReactSlingRequest(adapterManager, request, currentResource,
-				bindings, path);
+				bindings, currentResource.getPath());
 		if (originalBindings != null) {
 			bindings.setFlush(originalBindings.getFlush());
 			bindings.setLog(originalBindings.getLog());

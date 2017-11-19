@@ -173,7 +173,7 @@ public class Sling {
 				actualDepth = depth.intValue();
 			}
 
-			Resource resource = request.getResourceResolver().getResource(path);
+			Resource resource = request.getResourceResolver().resolve(request,path);
 			if (resource == null) {
 				return null;
 			}
