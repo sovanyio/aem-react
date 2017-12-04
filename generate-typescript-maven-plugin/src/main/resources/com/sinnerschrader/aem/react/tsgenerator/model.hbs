@@ -1,0 +1,8 @@
+{{#imports}}import \{{{name}}\} from '{{path}}';
+{{/imports}}
+export class {{name}} {{#superClass}}extends {{.}}{{/superClass}}  {
+{{#fields}}
+	  public readonly {{name}}: {{join types " | "}};{{/fields}}
+}
+
+export const NAME = '{{~fullSlingModelName~}}';

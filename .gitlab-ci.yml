@@ -7,6 +7,5 @@ before_script:
 
 build:
   script:
-    - cd core
-    - ../mvnw verify -Dgpg.skip=true
+    - ./mvnw install -Dgpg.skip=true
     
