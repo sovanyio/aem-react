@@ -18,9 +18,11 @@ import org.apache.commons.lang3.EnumUtils;
 
 import com.sinnerschrader.aem.react.tsgenerator.descriptor.ClassDescriptor;
 import com.sinnerschrader.aem.react.tsgenerator.descriptor.ClassDescriptor.ClassDescriptorBuilder;
+import com.sinnerschrader.aem.react.tsgenerator.descriptor.Discriminator;
 import com.sinnerschrader.aem.react.tsgenerator.descriptor.EnumDescriptor;
 import com.sinnerschrader.aem.react.tsgenerator.descriptor.ScanContext;
 import com.sinnerschrader.aem.react.tsgenerator.descriptor.TypeDescriptor;
+import com.sinnerschrader.aem.react.tsgenerator.descriptor.UnionType;
 import com.sinnerschrader.aem.react.tsgenerator.generator.PathMapper;
 import com.sinnerschrader.aem.react.typescript.Element;
 
@@ -68,26 +70,33 @@ public class GeneratorFromClass {
 		return td.build();
 	}
 
+	private static String getName(boolean unionType, Class<?> clazz) {
+		return !unionType ? clazz.getSimpleName() : "Base" + clazz.getSimpleName();
+	}
+
 	public static ClassDescriptor createClassDescriptor(Class<?> clazz, ScanContext ctx, PathMapper mapper) {
 		try {
 			ClassDescriptorBuilder builder = ClassDescriptor.builder();
+			UnionType unionType = ctx.unionTypes.get(clazz);
 
 			BeanInfo info = Introspector.getBeanInfo(clazz);
-			builder.name(info.getBeanDescriptor().getBeanClass().getSimpleName());
+			builder.name(getName(unionType != null, info.getBeanDescriptor().getBeanClass()));
 			builder.fullJavaClassName(info.getBeanDescriptor().getBeanClass().getName());
+			Discriminator discriminator = ctx.discriminators.get(clazz);
 
 			Class<?> superClass = info.getBeanDescriptor().getBeanClass().getSuperclass();
 			if (!superClass.equals(Object.class)) {
+				String superClassName = getName(discriminator != null, superClass);
 				builder.superClass(TypeDescriptor.builder()//
-						.type(superClass.getSimpleName())//
+						.type(superClassName)//
 						.extern(false)//
 						.path(mapper.apply(superClass.getName()))//
 						.build());
 
 			}
 
-			builder.discriminator(ctx.discriminators.get(clazz));
-			builder.unionType(ctx.unionTypes.get(clazz));
+			builder.discriminator(discriminator);
+			builder.unionType(unionType);
 
 			ClassDescriptor cd = builder.build();
 

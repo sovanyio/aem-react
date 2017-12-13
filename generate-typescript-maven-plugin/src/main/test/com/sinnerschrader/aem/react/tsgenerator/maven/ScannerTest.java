@@ -29,7 +29,7 @@ public class ScannerTest {
 		});
 
 		Assert.assertEquals(9, cds.size());
-		Assert.assertEquals(1, uts.size());
-		Assert.assertEquals(2, eds.size());
+		Assert.assertEquals(0, uts.size());
+		Assert.assertEquals(0, eds.size());
 	}
 }

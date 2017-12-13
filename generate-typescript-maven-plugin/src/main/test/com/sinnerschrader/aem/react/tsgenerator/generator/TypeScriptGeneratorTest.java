@@ -112,9 +112,9 @@ public class TypeScriptGeneratorTest {
 		ClassDescriptor descriptor = GeneratorFromClass.createClassDescriptor(Sub1.class, ctx,
 				new PathMapper(Sub1.class.getName()));
 		InterfaceModel model = TypeScriptGenerator.builder().build().generateModel(descriptor);
-		Assert.assertEquals("BaseModel", descriptor.getSuperClass().getType());
+		Assert.assertEquals("BaseBaseModel", descriptor.getSuperClass().getType());
 		Assert.assertEquals(1, model.getImports().size());
-		Assert.assertEquals("BaseModel", model.getSuperclass());
+		Assert.assertEquals("BaseBaseModel", model.getSuperclass());
 		Assert.assertNotNull(descriptor.getDiscriminator());
 		Assert.assertNotNull(model.getDiscriminator());
 		Assert.assertEquals("kind", model.getDiscriminator().getField());
@@ -142,7 +142,8 @@ public class TypeScriptGeneratorTest {
 		sub1.setMore("hi");
 		StringWriter writer = new StringWriter();
 
-		new ObjectMapper().writeValue(writer, sub1);
+		ObjectMapper objectMapper = new ObjectMapper();
+		objectMapper.writeValue(writer, sub1);
 		Assert.assertEquals("{\"kind\":\"sub1\",\"value\":null,\"more\":\"hi\"}", writer.toString());
 	}
 
