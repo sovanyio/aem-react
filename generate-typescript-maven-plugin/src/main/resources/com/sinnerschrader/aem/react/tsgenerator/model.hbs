@@ -1,6 +1,12 @@
 {{#imports}}import \{{{name}}\} from '{{path}}';
 {{/imports}}
+{{#unionModel}}
+export type {{name}} = {{#types}}.{{/types}};
+{{/unionModel}}
 export class {{name}} {{#superClass}}extends {{.}}{{/superClass}}  {
+{{#discriminator}}
+     public readonly {{name}} = '{{value}}';
+{{/discriminator}}
 {{#fields}}
 	  public readonly {{name}}: {{join types " | "}};{{/fields}}
 }

@@ -4,6 +4,7 @@ import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
+import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -18,6 +19,7 @@ import org.apache.commons.lang3.EnumUtils;
 import com.sinnerschrader.aem.react.tsgenerator.descriptor.ClassDescriptor;
 import com.sinnerschrader.aem.react.tsgenerator.descriptor.ClassDescriptor.ClassDescriptorBuilder;
 import com.sinnerschrader.aem.react.tsgenerator.descriptor.EnumDescriptor;
+import com.sinnerschrader.aem.react.tsgenerator.descriptor.ScanContext;
 import com.sinnerschrader.aem.react.tsgenerator.descriptor.TypeDescriptor;
 import com.sinnerschrader.aem.react.tsgenerator.generator.PathMapper;
 import com.sinnerschrader.aem.react.typescript.Element;
@@ -58,7 +60,7 @@ public class GeneratorFromClass {
 			typeDeclaration.append(propertyType.getSimpleName());
 			String path = mapper.apply(propertyType.getName());
 			td.path(path)//
-			.extern(true);
+					.extern(true);
 		}
 
 		td.type(typeDeclaration.toString());
@@ -66,7 +68,7 @@ public class GeneratorFromClass {
 		return td.build();
 	}
 
-	public static ClassDescriptor createClassDescriptor(Class<?> clazz, PathMapper mapper) {
+	public static ClassDescriptor createClassDescriptor(Class<?> clazz, ScanContext ctx, PathMapper mapper) {
 		try {
 			ClassDescriptorBuilder builder = ClassDescriptor.builder();
 
@@ -84,30 +86,45 @@ public class GeneratorFromClass {
 
 			}
 
+			builder.discriminator(ctx.discriminators.get(clazz));
+			builder.unionType(ctx.unionTypes.get(clazz));
+
 			ClassDescriptor cd = builder.build();
 
 			for (PropertyDescriptor pd : info.getPropertyDescriptors()) {
 				if (!BLACKLIST.contains(pd.getName()) && (pd.getReadMethod() != null || pd.getWriteMethod() != null)) {
 					Element fieldAnnotation = null;
+					boolean inherited = false;
 					try {
-						fieldAnnotation = clazz.getDeclaredField(pd.getName()).getAnnotation(Element.class);
+						Field declaredField = clazz.getDeclaredField(pd.getName());
+						inherited = declaredField.getDeclaringClass() != clazz;
+						fieldAnnotation = declaredField.getAnnotation(Element.class);
+
 					} catch (NoSuchFieldException | SecurityException e) {
 						//
 					}
+					if (pd.getReadMethod() != null) {
+						inherited = pd.getReadMethod().getDeclaringClass() != clazz;
+					}
+					if (inherited) {
+						continue;
+					}
 					Element getterAnnotation = pd.getReadMethod() != null
 							? pd.getReadMethod().getAnnotation(Element.class)
-									: null;
-							Element element = Optional//
-									.ofNullable(getterAnnotation)//
-									.orElse(fieldAnnotation);
-							com.sinnerschrader.aem.react.tsgenerator.descriptor.PropertyDescriptor pdd = com.sinnerschrader.aem.react.tsgenerator.descriptor.PropertyDescriptor
-									.builder()//
-									.name(pd.getName())//
-									.type(convertType(pd.getPropertyType(), element, mapper))//
-									.build();
+							: null;
+					Element element = Optional//
+							.ofNullable(getterAnnotation)//
+							.orElse(fieldAnnotation);
 
-							cd.getProperties().put(pdd.getName(), pdd);
+					com.sinnerschrader.aem.react.tsgenerator.descriptor.PropertyDescriptor pdd = com.sinnerschrader.aem.react.tsgenerator.descriptor.PropertyDescriptor
+							.builder()//
+							.name(pd.getName())//
+							.type(convertType(pd.getPropertyType(), element, mapper))//
+							.build();
+
+					cd.getProperties().put(pdd.getName(), pdd);
 				}
+
 			}
 
 			return cd;
@@ -116,9 +133,9 @@ public class GeneratorFromClass {
 		}
 	}
 
-	public static ClassDescriptor createClassDescriptor(String clazzName, PathMapper mapper) {
+	public static ClassDescriptor createClassDescriptor(String clazzName, ScanContext ctx, PathMapper mapper) {
 		try {
-			return createClassDescriptor(Class.forName(clazzName), mapper);
+			return createClassDescriptor(Class.forName(clazzName), ctx, mapper);
 		} catch (ClassNotFoundException e) {
 			throw new RuntimeException("error", e);
 		}

@@ -4,7 +4,7 @@
     <parent>
         <groupId>com.sinnerschrader.vw.aem.react</groupId>
         <artifactId>aem-react</artifactId>
-        <version>0.6.16-SNAPSHOT</version>
+        <version>0.6.17-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <artifactId>generate-typescript-maven-plugin</artifactId>
@@ -72,6 +72,11 @@
             <version>2.9.3</version>
         </dependency>
 
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>

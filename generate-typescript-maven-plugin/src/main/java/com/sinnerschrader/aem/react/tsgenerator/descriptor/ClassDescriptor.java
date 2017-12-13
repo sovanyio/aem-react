@@ -6,15 +6,16 @@ import java.util.Map;
 import lombok.Builder;
 import lombok.Getter;
 
-
-
 @Getter
 @Builder
-public class ClassDescriptor
-{
+public class ClassDescriptor {
 	private String name;
 
 	private String fullJavaClassName;
+
+	private Discriminator discriminator;
+
+	private UnionType unionType;
 
 	private TypeDescriptor superClass;
 

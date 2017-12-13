@@ -10,8 +10,11 @@ import lombok.Getter;
 public class InterfaceModel implements Comparable<InterfaceModel> {
 	private SortedSet<FieldModel> fields;
 	private String name;
+	private String superclass;
 	private String fullSlingModelName;
 	private SortedSet<ImportModel> imports;
+	private UnionModel unionModel;
+	private DiscriminatorModel discriminator;
 
 	@Override
 	public int compareTo(InterfaceModel o) {

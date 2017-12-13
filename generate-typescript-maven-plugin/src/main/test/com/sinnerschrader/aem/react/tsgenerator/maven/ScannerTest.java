@@ -8,6 +8,7 @@ import org.junit.Test;
 
 import com.sinnerschrader.aem.react.tsgenerator.descriptor.ClassDescriptor;
 import com.sinnerschrader.aem.react.tsgenerator.descriptor.EnumDescriptor;
+import com.sinnerschrader.aem.react.tsgenerator.descriptor.UnionType;
 import com.sinnerschrader.aem.react.typescript.ExportTs;
 
 public class ScannerTest {
@@ -20,12 +21,15 @@ public class ScannerTest {
 
 		final List<ClassDescriptor> cds = new ArrayList<>();
 		final List<EnumDescriptor> eds = new ArrayList<>();
+		final List<UnionType> uts = new ArrayList<>();
 		scanner.scan((ClassDescriptor cd) -> {
 			cds.add(cd);
 		}, (EnumDescriptor ed) -> {
 			eds.add(ed);
 		});
 
-		Assert.assertEquals(6, cds.size());
+		Assert.assertEquals(9, cds.size());
+		Assert.assertEquals(1, uts.size());
+		Assert.assertEquals(2, eds.size());
 	}
 }
