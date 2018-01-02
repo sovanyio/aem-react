@@ -12,7 +12,7 @@
   <groupId>com.sinnerschrader.vw.aem.react</groupId>
   <artifactId>aem-react</artifactId>
   <packaging>pom</packaging>
-  <version>0.6.19-SNAPSHOT</version>
+  <version>0.6.19</version>
   <name>aem react</name>
   <description>aem react library and demo</description>
   <url>www.github.com/sinnerschrader/aem-react</url>
@@ -40,7 +40,7 @@
     <connection>scm:git://git@git.sinnerschrader.com/vwa/aem-react.git</connection>
     <developerConnection>scm:git:git@git.sinnerschrader.com:vwa/aem-react.git</developerConnection>
     <url>https://git.sinnerschrader.com/vwa/aem-react.git</url>
-    <tag>HEAD</tag>
+    <tag>aem-react-0.6.19</tag>
   </scm>
 
   <distributionManagement>
