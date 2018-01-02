@@ -36,6 +36,8 @@ import com.sinnerschrader.aem.react.api.Sling;
 import com.sinnerschrader.aem.react.exception.TechnicalException;
 import com.sinnerschrader.aem.react.json.ResourceMapper;
 import com.sinnerschrader.aem.react.json.ResourceMapperLocator;
+import com.sinnerschrader.aem.react.metrics.ComponentMetrics;
+import com.sinnerschrader.aem.react.metrics.ComponentMetricsService;
 
 public class ReactScriptEngine extends AbstractSlingScriptEngine {
 
@@ -56,6 +58,7 @@ public class ReactScriptEngine extends AbstractSlingScriptEngine {
 	private org.apache.sling.models.factory.ModelFactory modelFactory;
 	private AdapterManager adapterManager;
 	private ObjectMapper mapper;
+	private ComponentMetricsService metricsService;
 
 	/**
 	 * This class is the result of rendering a react component(-tree). It consists
@@ -73,7 +76,7 @@ public class ReactScriptEngine extends AbstractSlingScriptEngine {
 	protected ReactScriptEngine(ReactScriptEngineFactory scriptEngineFactory, ObjectPool<JavascriptEngine> enginePool,
 			OsgiServiceFinder finder, DynamicClassLoaderManager dynamicClassLoaderManager, String rootElementName,
 			String rootElementClass, org.apache.sling.models.factory.ModelFactory modelFactory,
-			AdapterManager adapterManager, ObjectMapper mapper) {
+			AdapterManager adapterManager, ObjectMapper mapper, ComponentMetricsService metricsService) {
 		super(scriptEngineFactory);
 		this.adapterManager = adapterManager;
 		this.enginePool = enginePool;
@@ -83,6 +86,7 @@ public class ReactScriptEngine extends AbstractSlingScriptEngine {
 		this.rootElementClass = rootElementClass;
 		this.modelFactory = modelFactory;
 		this.mapper = mapper;
+		this.metricsService = metricsService;
 	}
 
 	@Override
@@ -98,64 +102,67 @@ public class ReactScriptEngine extends AbstractSlingScriptEngine {
 			SlingHttpServletResponse response = (SlingHttpServletResponse) bindings.get(SlingBindings.RESPONSE);
 			boolean renderAsJson = Arrays.asList(request.getRequestPathInfo().getSelectors()).indexOf("json") >= 0;
 			Resource resource = request.getResource();
+			try (ComponentMetrics metrics = metricsService.create(resource)) {
 
-			SlingBindings slingBindings = (SlingBindings) request.getAttribute(SlingBindings.class.getName());
-			if (slingBindings == null) {
-				slingBindings = new SlingBindings();
-				slingBindings.setSling(sling);
-				request.setAttribute(SlingBindings.class.getName(), slingBindings);
-			}
+				SlingBindings slingBindings = (SlingBindings) request.getAttribute(SlingBindings.class.getName());
+				if (slingBindings == null) {
+					slingBindings = new SlingBindings();
+					slingBindings.setSling(sling);
+					request.setAttribute(SlingBindings.class.getName(), slingBindings);
+				}
 
-			boolean dialog = request.getAttribute(Sling.ATTRIBUTE_AEM_REACT_DIALOG) != null;
+				boolean dialog = request.getAttribute(Sling.ATTRIBUTE_AEM_REACT_DIALOG) != null;
 
-			if (dialog) {
-				// just rendering to get the wrapper element and author mode js
-				scriptContext.getWriter().write("");
+				if (dialog) {
+					// just rendering to get the wrapper element and author mode js
+					scriptContext.getWriter().write("");
+					return null;
+				}
+
+				String renderedHtml;
+				boolean serverRendering = !SERVER_RENDERING_DISABLED
+						.equals(request.getParameter(SERVER_RENDERING_PARAM));
+				String cacheString = null;
+				String path = resource.getPath();
+				String mappedPath = request.getResourceResolver().map(request, path);
+				if (serverRendering) {
+					final Object reactContext = request.getAttribute(REACT_CONTEXT_KEY);
+					RenderResult result = renderReactMarkup(mappedPath, resource.getResourceType(), getWcmMode(request),
+							scriptContext, renderAsJson, reactContext);
+					renderedHtml = result.html;
+					cacheString = result.cache;
+					request.setAttribute(REACT_CONTEXT_KEY, result.reactContext);
+				} else if (renderAsJson) {
+					// development mode: return cache with just the current
+					// resource.
+					JSONObject cache = new JSONObject();
+					JSONObject resources = new JSONObject();
+					JSONObject resourceEntry = new JSONObject();
+					resourceEntry.put("depth", -1);
+					// depth is inaccurate
+					resourceEntry.put("data", JsonObjectCreator.create(resource, -1));
+					resources.put(mappedPath, resourceEntry);
+					cache.put("resources", resources);
+					cacheString = cache.toString();
+					renderedHtml = "";
+				} else {
+					// initial rendering in development mode
+					renderedHtml = "";
+				}
+
+				String output;
+				if (renderAsJson) {
+					output = cacheString;
+					response.setContentType("application/json");
+				} else {
+					output = wrapHtml(mappedPath, resource, renderedHtml, serverRendering, getWcmMode(request),
+							cacheString);
+
+				}
+
+				scriptContext.getWriter().write(output);
 				return null;
 			}
-
-			String renderedHtml;
-			boolean serverRendering = !SERVER_RENDERING_DISABLED.equals(request.getParameter(SERVER_RENDERING_PARAM));
-			String cacheString = null;
-			String path = resource.getPath();
-			String mappedPath = request.getResourceResolver().map(request, path);
-			if (serverRendering) {
-				final Object reactContext = request.getAttribute(REACT_CONTEXT_KEY);
-				RenderResult result = renderReactMarkup(mappedPath, resource.getResourceType(), getWcmMode(request),
-						scriptContext, renderAsJson, reactContext);
-				renderedHtml = result.html;
-				cacheString = result.cache;
-				request.setAttribute(REACT_CONTEXT_KEY, result.reactContext);
-			} else if (renderAsJson) {
-				// development mode: return cache with just the current
-				// resource.
-				JSONObject cache = new JSONObject();
-				JSONObject resources = new JSONObject();
-				JSONObject resourceEntry = new JSONObject();
-				resourceEntry.put("depth", -1);
-				// depth is inaccurate
-				resourceEntry.put("data", JsonObjectCreator.create(resource, -1));
-				resources.put(mappedPath, resourceEntry);
-				cache.put("resources", resources);
-				cacheString = cache.toString();
-				renderedHtml = "";
-			} else {
-				// initial rendering in development mode
-				renderedHtml = "";
-			}
-
-			String output;
-			if (renderAsJson) {
-				output = cacheString;
-				response.setContentType("application/json");
-			} else {
-				output = wrapHtml(mappedPath, resource, renderedHtml, serverRendering, getWcmMode(request),
-						cacheString);
-
-			}
-
-			scriptContext.getWriter().write(output);
-			return null;
 
 		} catch (Exception e) {
 			throw new ScriptException(e);
@@ -199,7 +206,7 @@ public class ReactScriptEngine extends AbstractSlingScriptEngine {
 		return allHtml;
 	}
 
-	private Cqx createCqx(ScriptContext ctx) {
+	protected Cqx createCqx(ScriptContext ctx) {
 		SlingHttpServletRequest request = (SlingHttpServletRequest) getBindings(ctx).get(SlingBindings.REQUEST);
 		SlingScriptHelper sling = (SlingScriptHelper) getBindings(ctx).get(SlingBindings.SLING);
 

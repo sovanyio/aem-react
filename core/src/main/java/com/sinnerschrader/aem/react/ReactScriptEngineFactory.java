@@ -46,6 +46,7 @@ import com.sinnerschrader.aem.react.loader.HashedScript;
 import com.sinnerschrader.aem.react.loader.JcrResourceChangeListener;
 import com.sinnerschrader.aem.react.loader.ScriptCollectionLoader;
 import com.sinnerschrader.aem.react.loader.ScriptLoader;
+import com.sinnerschrader.aem.react.metrics.ComponentMetricsService;
 import com.sinnerschrader.aem.react.repo.RepositoryConnectionFactory;
 
 @Component(label = "ReactJs Script Engine Factory", metatype = true)
@@ -87,6 +88,9 @@ public class ReactScriptEngineFactory extends AbstractScriptEngineFactory {
 
 	@Reference
 	private AdapterManager adapterManager;
+
+	@Reference
+	private ComponentMetricsService metricsService;
 
 	private static final String NASHORN_POLYFILL_JS = "nashorn-polyfill.js";
 
@@ -170,6 +174,7 @@ public class ReactScriptEngineFactory extends AbstractScriptEngineFactory {
 
 	@Activate
 	public void initialize(final ComponentContext context, Map<String, Object> properties) {
+
 		this.subServiceName = PropertiesUtil.toString(context.getProperties().get(PROPERTY_SUBSERVICENAME), "");
 		scriptResources = PropertiesUtil.toStringArray(context.getProperties().get(PROPERTY_SCRIPTS_PATHS),
 				new String[0]);
@@ -190,7 +195,7 @@ public class ReactScriptEngineFactory extends AbstractScriptEngineFactory {
 
 		ObjectPool<JavascriptEngine> pool = createPool(poolTotalSize, javacriptEnginePoolFactory);
 		this.engine = new ReactScriptEngine(this, pool, finder, dynamicClassLoaderManager, rootElementName,
-				rootElementClassName, modelFactory, adapterManager, mapper);
+				rootElementClassName, modelFactory, adapterManager, mapper, metricsService);
 		this.createScripts();
 
 		this.listener = new JcrResourceChangeListener(repositoryConnectionFactory,

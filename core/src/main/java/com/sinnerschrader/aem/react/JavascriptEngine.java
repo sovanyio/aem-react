@@ -21,6 +21,8 @@ import com.sinnerschrader.aem.react.api.Cqx;
 import com.sinnerschrader.aem.react.exception.TechnicalException;
 import com.sinnerschrader.aem.react.loader.HashedScript;
 import com.sinnerschrader.aem.react.loader.ScriptCollectionLoader;
+import com.sinnerschrader.aem.react.metrics.ComponentMetricsService;
+import com.sinnerschrader.aem.react.metrics.MetricsHelper;
 
 /**
  *
@@ -33,10 +35,16 @@ public class JavascriptEngine {
 	private ScriptCollectionLoader loader;
 	private ScriptEngine engine;
 	private Map<String, String> scriptChecksums;
+	private ComponentMetricsService metricsService;
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(JavascriptEngine.class);
 
-	public static class Console {
+	public class Console {
+
+		public Console() {
+			super();
+		}
+
 		public void debug(String statement, Object... args) {
 			LOGGER.debug(statement, args);
 		}
@@ -75,6 +83,14 @@ public class JavascriptEngine {
 
 		public void warn(String statement, Object error) {
 			LOGGER.warn(statement, error);
+		}
+
+		public void time(String name) {
+			MetricsHelper.getCurrent().timer(name);
+		}
+
+		public void timeEnd(String name) {
+			MetricsHelper.getCurrent().timerEnd(name);
 		}
 
 	}
@@ -198,7 +214,7 @@ public class JavascriptEngine {
 		while (iterator.hasNext()) {
 			HashedScript next = iterator.next();
 			String checksum = scriptChecksums.get(next.getId());
-			if (checksum==null || !checksum.equals(next.getChecksum())) {
+			if (checksum == null || !checksum.equals(next.getChecksum())) {
 				return true;
 			}
 		}

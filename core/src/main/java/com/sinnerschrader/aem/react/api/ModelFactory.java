@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sinnerschrader.aem.react.metrics.MetricsHelper;
 
 /**
  *
@@ -192,12 +193,14 @@ public class ModelFactory {
 			LOGGER.error("could not find model class " + className);
 			return null;
 		}
-		Object object = modelFactory.createModel(adaptable, clazz);
+		return MetricsHelper.getCurrent().timer("model", () -> {
+			Object object = modelFactory.createModel(adaptable, clazz);
 
-		if (object == null) {
-			return null;
-		}
-		return new JsProxy(object, clazz, mapper);
+			if (object == null) {
+				return null;
+			}
+			return new JsProxy(object, clazz, mapper);
+		});
 	}
 
 }

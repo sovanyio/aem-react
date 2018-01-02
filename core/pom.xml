@@ -45,7 +45,8 @@
                             antlr4-runtime,
                             rhino,
                             jsoup,
-                            aem-react-api
+                            aem-react-api,
+                            metrics-core
                         </Embed-Dependency>
                         <Export-Package>com.sinnerschrader.aem.react.*</Export-Package>
                         <Sling-Model-Packages />
@@ -208,6 +209,11 @@
             <groupId>org.jsoup</groupId>
             <artifactId>jsoup</artifactId>
             <version>1.8.3</version>
+        </dependency>
+        <dependency>
+            <groupId>io.dropwizard.metrics</groupId>
+            <artifactId>metrics-core</artifactId>
+            <version>3.2.5</version>
         </dependency>
     </dependencies>
 </project>

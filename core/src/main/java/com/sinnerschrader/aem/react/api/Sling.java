@@ -33,6 +33,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sinnerschrader.aem.react.PrintWriterResponseWrapper;
 import com.sinnerschrader.aem.react.exception.TechnicalException;
+import com.sinnerschrader.aem.react.metrics.MetricsHelper;
 
 /**
  * This class is exposed to the react components and provides the base
@@ -173,7 +174,7 @@ public class Sling {
 				actualDepth = depth.intValue();
 			}
 
-			Resource resource = request.getResourceResolver().resolve(request,path);
+			Resource resource = request.getResourceResolver().resolve(request, path);
 			if (resource == null) {
 				return null;
 			}
@@ -232,11 +233,14 @@ public class Sling {
 	 */
 	public String includeResource(String path, String resourceType, String addSelectors, String selectors,
 			String decorationTagName) {
-		ResourceIncludeOptions options = new ResourceIncludeOptions();
-		options.setAddSelectors(addSelectors);
-		options.setSelectors(selectors);
-		options.setDecorationTagName(decorationTagName);
-		return this._includeResource(path, resourceType, options, false);
+		return MetricsHelper.getCurrent().timer("include", () -> {
+			ResourceIncludeOptions options = new ResourceIncludeOptions();
+			options.setAddSelectors(addSelectors);
+			options.setSelectors(selectors);
+			options.setDecorationTagName(decorationTagName);
+			return this._includeResource(path, resourceType, options, false);
+
+		});
 	}
 
 	/**

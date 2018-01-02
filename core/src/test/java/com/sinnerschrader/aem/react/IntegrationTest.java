@@ -3,6 +3,8 @@ package com.sinnerschrader.aem.react;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.NoSuchElementException;
 
 import javax.script.Bindings;
@@ -25,7 +27,6 @@ import org.jsoup.select.Elements;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
@@ -34,10 +35,13 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.sinnerschrader.aem.react.ReactScriptEngine.RenderResult;
+import com.sinnerschrader.aem.react.api.Sling;
+import com.sinnerschrader.aem.react.loader.HashedScript;
+import com.sinnerschrader.aem.react.loader.ScriptCollectionLoader;
 import com.sinnerschrader.aem.react.metrics.ComponentMetricsService;
 
 @RunWith(MockitoJUnitRunner.class)
-public class ReactScriptEngineTest {
+public class IntegrationTest {
 
 	@Mock
 	private Resource resource;
@@ -55,6 +59,9 @@ public class ReactScriptEngineTest {
 	private DynamicClassLoaderManager dynamicClassLoaderManager;
 
 	@Mock
+	private ScriptCollectionLoader loader;
+
+	@Mock
 	private SlingHttpServletRequest request;
 
 	@Mock
@@ -65,9 +72,6 @@ public class ReactScriptEngineTest {
 
 	@Mock
 	private ObjectPool<JavascriptEngine> enginePool;
-
-	@Mock
-	private JavascriptEngine engine;
 
 	@Mock
 	private SlingScriptHelper sling;
@@ -90,10 +94,19 @@ public class ReactScriptEngineTest {
 
 	@Test
 	public void testEval() throws NoSuchElementException, IllegalStateException, Exception {
+		JavascriptEngine jsEngine = new JavascriptEngine();
+
+		String script = "var AemGlobal = {}; AemGlobal.renderReactComponent = function() {return {state:'{}',html:'',reactContext:{}};};";
+		List<HashedScript> scripts = new ArrayList<>();
+		scripts.add(new HashedScript("ff", script, "/script"));
+		Mockito.when(loader.iterator()).thenReturn(scripts.iterator());
+
+		ScriptContext scriptContext = new SimpleScriptContext();
+		jsEngine.initialize(loader, new Sling(scriptContext));
+
 		ReactScriptEngine r = new ReactScriptEngine(factory, enginePool, null, dynamicClassLoaderManager, "span",
 				"test xxx", null, null, null, new ComponentMetricsService());
 		Mockito.when(factory.getClassLoader()).thenReturn(classLoader);
-		ScriptContext scriptContext = new SimpleScriptContext();
 		StringWriter writer = new StringWriter();
 		scriptContext.setWriter(writer);
 		Bindings bindings = scriptContext.getBindings(ScriptContext.ENGINE_SCOPE);
@@ -104,10 +117,7 @@ public class ReactScriptEngineTest {
 		Mockito.when(request.getRequestPathInfo()).thenReturn(info);
 		Mockito.when(info.getSelectors()).thenReturn(new String[0]);
 
-		Mockito.when(enginePool.borrowObject()).thenReturn(engine);
-		RenderResult result = new RenderResult();
-		result.cache = "{\"cache\":true}";
-		result.html = "<div></div>";
+		Mockito.when(enginePool.borrowObject()).thenReturn(jsEngine);
 
 		String resourceType = "/apps/test";
 		Mockito.when(resource.getResourceType()).thenReturn(resourceType);
@@ -116,8 +126,6 @@ public class ReactScriptEngineTest {
 		Mockito.when(resource.getPath()).thenReturn(path);
 		Mockito.when(request.getResource()).thenReturn(resource);
 
-		Mockito.when(engine.render(Matchers.eq(path), Matchers.eq(resourceType), Matchers.eq("disabled"),
-				Mockito.anyObject(), Matchers.eq(false), Matchers.eq(null))).thenReturn(result);
 		RenderResult renderResult = (RenderResult) r.eval(new StringReader(""), scriptContext);
 		Assert.assertNull(renderResult);
 		String renderedHtml = writer.getBuffer().toString();
@@ -131,12 +139,13 @@ public class ReactScriptEngineTest {
 
 		Element textarea = getTextarea(doc);
 		ObjectNode jsonFromTextArea = getJsonFromTextArea(textarea);
-		Assert.assertTrue(wrapper.html().startsWith(result.html));
+		Assert.assertTrue(wrapper.html().startsWith(""));
 		Assert.assertEquals(resourceType, jsonFromTextArea.get("resourceType").asText());
 		Assert.assertEquals(path, jsonFromTextArea.get("path").asText());
-		Assert.assertEquals(result.cache, jsonFromTextArea.get("cache").toString());
+		Assert.assertEquals("{}", jsonFromTextArea.get("cache").toString());
 		Assert.assertEquals(path + "_component", wrapper.attr("data-react-id"));
 		Assert.assertEquals(path + "_component", textarea.attr("id"));
 
 	}
+
 }
