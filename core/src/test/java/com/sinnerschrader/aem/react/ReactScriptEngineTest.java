@@ -3,6 +3,7 @@ package com.sinnerschrader.aem.react;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.util.ArrayList;
 import java.util.NoSuchElementException;
 
 import javax.script.Bindings;
@@ -117,7 +118,8 @@ public class ReactScriptEngineTest {
 		Mockito.when(request.getResource()).thenReturn(resource);
 
 		Mockito.when(engine.render(Matchers.eq(path), Matchers.eq(resourceType), Matchers.eq("disabled"),
-				Mockito.anyObject(), Matchers.eq(false), Matchers.eq(null))).thenReturn(result);
+				Mockito.anyObject(), Matchers.eq(false), Matchers.eq(null), Matchers.eq(new ArrayList<>())))
+				.thenReturn(result);
 		RenderResult renderResult = (RenderResult) r.eval(new StringReader(""), scriptContext);
 		Assert.assertNull(renderResult);
 		String renderedHtml = writer.getBuffer().toString();

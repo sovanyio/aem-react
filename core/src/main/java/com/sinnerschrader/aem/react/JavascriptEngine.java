@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import javax.script.Bindings;
@@ -162,14 +163,14 @@ public class JavascriptEngine {
 	 * @return
 	 */
 	public RenderResult render(String path, String resourceType, String wcmmode, Cqx cqx, boolean renderAsJson,
-			Object reactContext) {
+			Object reactContext, List<String> selectors) {
 
 		Invocable invocable = ((Invocable) engine);
 		try {
 			engine.getBindings(ScriptContext.ENGINE_SCOPE).put("Cqx", cqx);
 			Object AemGlobal = engine.get("AemGlobal");
 			Object value = invocable.invokeMethod(AemGlobal, "renderReactComponent", path, resourceType, wcmmode,
-					renderAsJson, reactContext);
+					renderAsJson, reactContext, selectors.toArray(new String[selectors.size()]));
 
 			RenderResult result = new RenderResult();
 			result.html = (String) ((Map<String, Object>) value).get("html");

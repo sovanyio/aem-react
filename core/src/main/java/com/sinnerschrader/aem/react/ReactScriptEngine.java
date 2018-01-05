@@ -2,6 +2,7 @@ package com.sinnerschrader.aem.react;
 
 import java.io.Reader;
 import java.util.Arrays;
+import java.util.List;
 import java.util.NoSuchElementException;
 
 import javax.script.Bindings;
@@ -100,7 +101,8 @@ public class ReactScriptEngine extends AbstractSlingScriptEngine {
 			SlingScriptHelper sling = (SlingScriptHelper) bindings.get(SlingBindings.SLING);
 			SlingHttpServletRequest request = (SlingHttpServletRequest) bindings.get(SlingBindings.REQUEST);
 			SlingHttpServletResponse response = (SlingHttpServletResponse) bindings.get(SlingBindings.RESPONSE);
-			boolean renderAsJson = Arrays.asList(request.getRequestPathInfo().getSelectors()).indexOf("json") >= 0;
+			List<String> selectors = Arrays.asList(request.getRequestPathInfo().getSelectors());
+			boolean renderAsJson = selectors.indexOf("json") >= 0;
 			Resource resource = request.getResource();
 			try (ComponentMetrics metrics = metricsService.create(resource)) {
 
@@ -128,7 +130,7 @@ public class ReactScriptEngine extends AbstractSlingScriptEngine {
 				if (serverRendering) {
 					final Object reactContext = request.getAttribute(REACT_CONTEXT_KEY);
 					RenderResult result = renderReactMarkup(mappedPath, resource.getResourceType(), getWcmMode(request),
-							scriptContext, renderAsJson, reactContext);
+							scriptContext, renderAsJson, reactContext, selectors);
 					renderedHtml = result.html;
 					cacheString = result.cache;
 					request.setAttribute(REACT_CONTEXT_KEY, result.reactContext);
@@ -156,7 +158,7 @@ public class ReactScriptEngine extends AbstractSlingScriptEngine {
 					response.setContentType("application/json");
 				} else {
 					output = wrapHtml(mappedPath, resource, renderedHtml, serverRendering, getWcmMode(request),
-							cacheString);
+							cacheString, selectors);
 
 				}
 
@@ -184,13 +186,14 @@ public class ReactScriptEngine extends AbstractSlingScriptEngine {
 	 * @return
 	 */
 	String wrapHtml(String mappedPath, Resource resource, String renderedHtml, boolean serverRendering, String wcmmode,
-			String cache) {
+			String cache, List<String> selectors) {
 		JSONObject reactProps = new JSONObject();
 		try {
 			if (cache != null) {
 				reactProps.put("cache", new JSONObject(cache));
 			}
 			reactProps.put("resourceType", resource.getResourceType());
+			reactProps.put("selectors", selectors);
 			reactProps.put("path", mappedPath);
 			reactProps.put("wcmmode", wcmmode);
 		} catch (JSONException e) {
@@ -225,7 +228,7 @@ public class ReactScriptEngine extends AbstractSlingScriptEngine {
 	 * @return
 	 */
 	private RenderResult renderReactMarkup(String mappedPath, String resourceType, String wcmmode,
-			ScriptContext scriptContext, boolean renderAsJson, Object reactContext) {
+			ScriptContext scriptContext, boolean renderAsJson, Object reactContext, List<String> selectors) {
 		JavascriptEngine javascriptEngine;
 		boolean removeMapper = false;
 		try {
@@ -240,7 +243,7 @@ public class ReactScriptEngine extends AbstractSlingScriptEngine {
 					javascriptEngine = enginePool.borrowObject();
 				}
 				return javascriptEngine.render(mappedPath, resourceType, wcmmode, createCqx(scriptContext),
-						renderAsJson, reactContext);
+						renderAsJson, reactContext, selectors);
 			} finally {
 
 				try {
