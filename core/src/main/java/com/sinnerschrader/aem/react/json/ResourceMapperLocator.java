@@ -1,5 +1,7 @@
 package com.sinnerschrader.aem.react.json;
 
+import org.apache.sling.api.SlingHttpServletRequest;
+
 public class ResourceMapperLocator {
 
 	public static ThreadLocal<ResourceMapper> mapperHolder = new ThreadLocal<>();
@@ -9,11 +11,15 @@ public class ResourceMapperLocator {
 	}
 
 	public static boolean setInstance(ResourceMapper mapper) {
-		if (getInstance()!=null) {
+		if (getInstance() != null) {
 			return false;
 		}
 		mapperHolder.set(mapper);
 		return true;
+	}
+
+	public static boolean setInstance(SlingHttpServletRequest request) {
+		return setInstance(new ResourceMapper(request));
 	}
 
 	public static void clearInstance() {
