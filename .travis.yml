@@ -14,9 +14,8 @@ install:
   - tar xvf wkhtmltox-0.12.4_linux-generic-amd64.tar.xz
 
 script: 
- - ./docs/deploy.sh
  - mvn verify -Dgpg.skip=true
-
+ - ./docs/deploy.sh
 env:
   global:
   - ENCRYPTION_LABEL: "7345bb60ed89"

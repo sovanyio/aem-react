@@ -37,18 +37,23 @@
   </modules>
   
   <scm>
-    <connection>scm:git://git@git.sinnerschrader.com/vwa/aem-react.git</connection>
-    <developerConnection>scm:git:git@git.sinnerschrader.com:vwa/aem-react.git</developerConnection>
-    <url>https://git.sinnerschrader.com/vwa/aem-react.git</url>
+    <connection>scm:git://github.com/sinnerschrader/aem-react.git</connection>
+    <developerConnection>scm:git:git@github.com:sinnerschrader/aem-react.git</developerConnection>
+    <url>https://github.com/sinnerschrader/aem-react.git</url>
     <tag>HEAD</tag>
   </scm>
 
   <distributionManagement>
     <repository>
-      <id>s2-nexus</id>
-      <name>s2-nexus-staging</name>
-      <url>https://repo.sinnerschrader.com/repository/vwa-maven-hosted-1/</url>
+      <id>ossrh</id>
+      <name>sonatype-nexus-staging</name>
+      <url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>
     </repository>
+    <snapshotRepository>
+      <id>ossrh</id>
+      <name>Sonatype Nexus Snapshots</name>
+      <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+    </snapshotRepository>
   </distributionManagement>
 
   <properties>
@@ -64,7 +69,32 @@
   </properties>
   <build>
     <plugins>
-      <!-- Maven Release Plugin -->
+  <plugin>
+      <groupId>org.apache.maven.plugins</groupId>
+      <artifactId>maven-gpg-plugin</artifactId>
+      <version>1.5</version>
+      <executions>
+        <execution>
+          <id>sign-artifacts</id>
+          <phase>verify</phase>
+          <goals>
+            <goal>sign</goal>
+          </goals>
+        </execution>
+      </executions>
+    </plugin>
+    <plugin>
+      <groupId>org.sonatype.plugins</groupId>
+      <artifactId>nexus-staging-maven-plugin</artifactId>
+      <version>1.6.3</version>
+      <extensions>true</extensions>
+      <configuration>
+        <serverId>ossrh</serverId>
+        <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+        <autoReleaseAfterClose>true</autoReleaseAfterClose>
+      </configuration>
+    </plugin>
+    <!-- Maven Release Plugin -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-release-plugin</artifactId>
