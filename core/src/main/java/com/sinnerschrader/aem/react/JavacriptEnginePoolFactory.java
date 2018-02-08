@@ -30,7 +30,7 @@ public class JavacriptEnginePoolFactory extends BasePooledObjectFactory<Javascri
 
 	@Override
 	public JavascriptEngine create() throws Exception {
-		LOGGER.error("created new javascript engine");
+		LOGGER.debug("created new javascript engine");
 		JavascriptEngine javascriptEngine = new JavascriptEngine();
 		javascriptEngine.initialize(loader, sling);
 		return javascriptEngine;

@@ -107,6 +107,7 @@ public class ReactScriptEngine extends AbstractSlingScriptEngine {
 			SlingHttpServletResponse response = (SlingHttpServletResponse) bindings.get(SlingBindings.RESPONSE);
 			List<String> selectors = Arrays.asList(request.getRequestPathInfo().getSelectors());
 			boolean renderAsJson = selectors.indexOf("json") >= 0;
+            String debug = request.getParameter("debug");
 			Resource resource = request.getResource();
 			try (ComponentMetrics metrics = metricsService.create(resource)) {
 
@@ -168,16 +169,19 @@ public class ReactScriptEngine extends AbstractSlingScriptEngine {
 
 				scriptContext.getWriter().write(output);
 				return null;
-			}
+			} catch (Exception e) {
+                if (debug != null) {
+                    try {
+                        scriptContext.getWriter().write(e.toString());
+                        return null;
+                    } catch (Exception ex) {
+                        throw new ScriptException(e);
+                    }
+                }
+                throw new ScriptException(e);
+            }
 
 		} catch (Exception e) {
-			if (!isProduction()) {
-				try {
-					scriptContext.getWriter().write(e.toString());
-				} catch (Exception ex) {
-					throw new ScriptException(e);
-				}
-			}
 			throw new ScriptException(e);
 		} finally {
 			Thread.currentThread().setContextClassLoader(old);
