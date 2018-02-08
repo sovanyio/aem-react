@@ -6,11 +6,7 @@ import java.io.Reader;
 import java.net.URL;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.Base64;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import javax.jcr.RepositoryException;
 import javax.script.ScriptEngine;
@@ -197,6 +193,7 @@ public class ReactScriptEngineFactory extends AbstractScriptEngineFactory {
 		this.engine = new ReactScriptEngine(this, pool, finder, dynamicClassLoaderManager, rootElementName,
 				rootElementClassName, modelFactory, adapterManager, mapper, metricsService);
 		this.createScripts();
+		this.poolWarmup(pool, poolTotalSize);
 
 		this.listener = new JcrResourceChangeListener(repositoryConnectionFactory,
 				new JcrResourceChangeListener.Listener() {
@@ -229,6 +226,35 @@ public class ReactScriptEngineFactory extends AbstractScriptEngineFactory {
 		config.setMaxIdle(poolTotalSize);
 		config.setMinIdle(poolTotalSize / 3);
 		return new GenericObjectPool<JavascriptEngine>(javacriptEnginePoolFactory, config);
+	}
+
+	private void poolWarmup(ObjectPool<JavascriptEngine> pool, int size) {
+		for (int i = 0; i < size; i++) {
+			final int k = i;
+			Thread t = new Thread(new Runnable() {
+				@Override
+				public void run() {
+					LOGGER.debug("Warming pool item " + String.valueOf(k));
+					JavascriptEngine tEngine = null;
+					try {
+						tEngine = pool.borrowObject();
+						// Make a call to force JIT script compilation
+						boolean isComp = tEngine.isReactComponent("bad-component");
+					} catch (Exception e) {
+						LOGGER.error("Failed to warm pool object " + e.toString());
+					} finally {
+						try {
+							if(tEngine != null)
+								pool.returnObject(tEngine);
+						} catch (Exception e) {
+							LOGGER.error("Failed to return pool object " + e.toString());
+						}
+					}
+					LOGGER.debug("Warmed pool item " + String.valueOf(k));
+				}
+			});
+			t.start();
+		}
 	}
 
 	@Override

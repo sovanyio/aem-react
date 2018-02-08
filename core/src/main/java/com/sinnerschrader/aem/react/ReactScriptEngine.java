@@ -12,6 +12,7 @@ import javax.script.ScriptException;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.pool2.ObjectPool;
+import org.apache.felix.scr.annotations.Reference;
 import org.apache.jackrabbit.util.Text;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
@@ -24,6 +25,7 @@ import org.apache.sling.commons.json.JSONException;
 import org.apache.sling.commons.json.JSONObject;
 import org.apache.sling.commons.json.sling.JsonObjectCreator;
 import org.apache.sling.scripting.api.AbstractSlingScriptEngine;
+import org.apache.sling.settings.SlingSettingsService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,6 +50,8 @@ public class ReactScriptEngine extends AbstractSlingScriptEngine {
 		public Object execute(JavascriptEngine e);
 	}
 
+	@Reference
+	private SlingSettingsService slingSettingsService;
 	private static final String SERVER_RENDERING_DISABLED = "disabled";
 	private static final String SERVER_RENDERING_PARAM = "serverRendering";
 	private static final Logger LOG = LoggerFactory.getLogger(ReactScriptEngine.class);
@@ -167,11 +171,22 @@ public class ReactScriptEngine extends AbstractSlingScriptEngine {
 			}
 
 		} catch (Exception e) {
+			if (!isProduction()) {
+				try {
+					scriptContext.getWriter().write(e.toString());
+				} catch (Exception ex) {
+					throw new ScriptException(e);
+				}
+			}
 			throw new ScriptException(e);
 		} finally {
 			Thread.currentThread().setContextClassLoader(old);
 		}
 
+	}
+
+	private boolean isProduction() {
+		return this.slingSettingsService.getRunModes().contains("production");
 	}
 
 	/**

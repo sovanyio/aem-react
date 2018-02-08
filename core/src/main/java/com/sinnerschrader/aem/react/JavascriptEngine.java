@@ -178,6 +178,7 @@ public class JavascriptEngine {
 			result.reactContext = ((Map<String, Object>) value).get("reactContext");
 			return result;
 		} catch (NoSuchMethodException | ScriptException e) {
+			LOGGER.error("cannot render react on server", e);
 			throw new TechnicalException("cannot render react on server", e);
 		}
 	}
