@@ -185,10 +185,6 @@ public class ReactScriptEngine extends AbstractSlingScriptEngine {
 
 	}
 
-	private boolean isProduction() {
-		return this.slingSettingsService.getRunModes().contains("production");
-	}
-
 	/**
 	 * wrap the rendered react markup with the teaxtarea that contains the
 	 * component's props.

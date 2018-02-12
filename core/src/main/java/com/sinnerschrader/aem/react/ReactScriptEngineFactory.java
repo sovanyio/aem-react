@@ -52,6 +52,7 @@ import com.sinnerschrader.aem.react.repo.RepositoryConnectionFactory;
 		@Property(name = ReactScriptEngineFactory.PROPERTY_SCRIPTS_PATHS, label = "the jcr paths to the scripts libraries", value = {}, cardinality = Integer.MAX_VALUE), //
 		@Property(name = ReactScriptEngineFactory.PROPERTY_SUBSERVICENAME, label = "the subservicename for accessing the script resources. If it is null then the deprecated system admin will be used.", value = ""), //
 		@Property(name = ReactScriptEngineFactory.PROPERTY_POOL_TOTAL_SIZE, label = "total javascript engine pool size", longValue = 20), //
+		@Property(name = ReactScriptEngineFactory.PROPERTY_POOL_INITIAL_WARM_SIZE, label = "number of pool items to request on bundle start to warm the pool", longValue = 20), //
 		@Property(name = ReactScriptEngineFactory.PROPERTY_ROOT_ELEMENT_NAME, label = "the root element name of the", value = "div"), //
 		@Property(name = ReactScriptEngineFactory.PROPERTY_ROOR_CLASS_NAME, label = "the root element class name", value = ""), //
 		@Property(name = ReactScriptEngineFactory.JSON_RESOURCEMAPPING_INCLUDE_PATTERN, label = "pattern for text properties in sling models that must be mapped by resource resover", value = "^/content"), //
@@ -62,6 +63,7 @@ public class ReactScriptEngineFactory extends AbstractScriptEngineFactory {
 	public static final String PROPERTY_SCRIPTS_PATHS = "scripts.paths";
 	public static final String PROPERTY_SUBSERVICENAME = "subServiceName";
 	public static final String PROPERTY_POOL_TOTAL_SIZE = "pool.total.size";
+	public static final String PROPERTY_POOL_INITIAL_WARM_SIZE = "pool.warm.size";
 	public static final String PROPERTY_ROOT_ELEMENT_NAME = "root.element.name";
 	public static final String PROPERTY_ROOR_CLASS_NAME = "root.element.class.name";
 	public static final String JSON_RESOURCEMAPPING_INCLUDE_PATTERN = "json.resourcemapping.include.pattern";
@@ -175,6 +177,8 @@ public class ReactScriptEngineFactory extends AbstractScriptEngineFactory {
 		scriptResources = PropertiesUtil.toStringArray(context.getProperties().get(PROPERTY_SCRIPTS_PATHS),
 				new String[0]);
 		int poolTotalSize = PropertiesUtil.toInteger(context.getProperties().get(PROPERTY_POOL_TOTAL_SIZE), 20);
+		int initialWarmEngineCount = PropertiesUtil.toInteger(context.getProperties().get(PROPERTY_POOL_INITIAL_WARM_SIZE), 20);
+
 		String rootElementName = PropertiesUtil.toString(context.getProperties().get(PROPERTY_ROOT_ELEMENT_NAME),
 				"div");
 		String rootElementClassName = PropertiesUtil.toString(context.getProperties().get(PROPERTY_ROOR_CLASS_NAME),
@@ -189,11 +193,15 @@ public class ReactScriptEngineFactory extends AbstractScriptEngineFactory {
 
 		ObjectMapper mapper = new ObjectMapperFactory().create(includePattern, excludePattern);
 
+		if (initialWarmEngineCount > poolTotalSize) {
+			initialWarmEngineCount = poolTotalSize;
+		}
+
 		ObjectPool<JavascriptEngine> pool = createPool(poolTotalSize, javacriptEnginePoolFactory);
 		this.engine = new ReactScriptEngine(this, pool, finder, dynamicClassLoaderManager, rootElementName,
 				rootElementClassName, modelFactory, adapterManager, mapper, metricsService);
 		this.createScripts();
-		this.poolWarmup(pool, poolTotalSize);
+		this.poolWarmup(pool, initialWarmEngineCount);
 
 		this.listener = new JcrResourceChangeListener(repositoryConnectionFactory,
 				new JcrResourceChangeListener.Listener() {
@@ -238,8 +246,6 @@ public class ReactScriptEngineFactory extends AbstractScriptEngineFactory {
 					JavascriptEngine tEngine = null;
 					try {
 						tEngine = pool.borrowObject();
-						// Make a call to force JIT script compilation
-						boolean isComp = tEngine.isReactComponent("bad-component");
 					} catch (Exception e) {
 						LOGGER.error("Failed to warm pool object " + e.toString());
 					} finally {
