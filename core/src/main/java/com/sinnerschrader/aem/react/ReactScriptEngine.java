@@ -60,6 +60,7 @@ public class ReactScriptEngine extends AbstractSlingScriptEngine {
 	private AdapterManager adapterManager;
 	private ObjectMapper mapper;
 	private ComponentMetricsService metricsService;
+	private boolean debugEnabled;
 
 	/**
 	 * This class is the result of rendering a react component(-tree). It consists
@@ -77,7 +78,7 @@ public class ReactScriptEngine extends AbstractSlingScriptEngine {
 	protected ReactScriptEngine(ReactScriptEngineFactory scriptEngineFactory, ObjectPool<JavascriptEngine> enginePool,
 			OsgiServiceFinder finder, DynamicClassLoaderManager dynamicClassLoaderManager, String rootElementName,
 			String rootElementClass, org.apache.sling.models.factory.ModelFactory modelFactory,
-			AdapterManager adapterManager, ObjectMapper mapper, ComponentMetricsService metricsService) {
+			AdapterManager adapterManager, ObjectMapper mapper, ComponentMetricsService metricsService, boolean debug) {
 		super(scriptEngineFactory);
 		this.adapterManager = adapterManager;
 		this.enginePool = enginePool;
@@ -88,6 +89,7 @@ public class ReactScriptEngine extends AbstractSlingScriptEngine {
 		this.modelFactory = modelFactory;
 		this.mapper = mapper;
 		this.metricsService = metricsService;
+		this.debugEnabled = debug;
 	}
 
 	@Override
@@ -166,7 +168,7 @@ public class ReactScriptEngine extends AbstractSlingScriptEngine {
 				scriptContext.getWriter().write(output);
 				return null;
 			} catch (Exception e) {
-                if (debug != null) {
+                if (debugEnabled && debug != null) {
                     try {
                         scriptContext.getWriter().write(e.toString());
                         return null;

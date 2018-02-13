@@ -12,6 +12,7 @@ import javax.jcr.RepositoryException;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineFactory;
 
+import com.fasterxml.jackson.databind.annotation.JsonAppend;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.pool2.ObjectPool;
 import org.apache.commons.pool2.impl.GenericObjectPool;
@@ -52,9 +53,12 @@ import com.sinnerschrader.aem.react.repo.RepositoryConnectionFactory;
 		@Property(name = ReactScriptEngineFactory.PROPERTY_SCRIPTS_PATHS, label = "the jcr paths to the scripts libraries", value = {}, cardinality = Integer.MAX_VALUE), //
 		@Property(name = ReactScriptEngineFactory.PROPERTY_SUBSERVICENAME, label = "the subservicename for accessing the script resources. If it is null then the deprecated system admin will be used.", value = ""), //
 		@Property(name = ReactScriptEngineFactory.PROPERTY_POOL_TOTAL_SIZE, label = "total javascript engine pool size", longValue = 20), //
+		@Property(name = ReactScriptEngineFactory.PROPERTY_POOL_MAX_IDLE, label = "maximum number of pool objects that can be idle", longValue = 20), //
+		@Property(name = ReactScriptEngineFactory.PROPERTY_POOL_MIN_IDLE, label = "minimum number of pool objects to keep idle", longValue = 7), //
 		@Property(name = ReactScriptEngineFactory.PROPERTY_POOL_INITIAL_WARM_SIZE, label = "number of pool items to request on bundle start to warm the pool", longValue = 20), //
 		@Property(name = ReactScriptEngineFactory.PROPERTY_ROOT_ELEMENT_NAME, label = "the root element name of the", value = "div"), //
-		@Property(name = ReactScriptEngineFactory.PROPERTY_ROOR_CLASS_NAME, label = "the root element class name", value = ""), //
+		@Property(name = ReactScriptEngineFactory.PROPERTY_ROOT_CLASS_NAME, label = "the root element class name", value = ""), //
+		@Property(name = ReactScriptEngineFactory.PROPERTY_DEBUG, label = "enable &debug request param to force exceptions to output to page", boolValue = false), //
 		@Property(name = ReactScriptEngineFactory.JSON_RESOURCEMAPPING_INCLUDE_PATTERN, label = "pattern for text properties in sling models that must be mapped by resource resover", value = "^/content"), //
 		@Property(name = ReactScriptEngineFactory.JSON_RESOURCEMAPPING_EXCLUDE_PATTERN, label = "pattern to include properties from resource mapping", value = "") //
 })
@@ -63,9 +67,12 @@ public class ReactScriptEngineFactory extends AbstractScriptEngineFactory {
 	public static final String PROPERTY_SCRIPTS_PATHS = "scripts.paths";
 	public static final String PROPERTY_SUBSERVICENAME = "subServiceName";
 	public static final String PROPERTY_POOL_TOTAL_SIZE = "pool.total.size";
+	public static final String PROPERTY_POOL_MAX_IDLE = "pool.idle.max";
+	public static final String PROPERTY_POOL_MIN_IDLE = "pool.idle.min";
 	public static final String PROPERTY_POOL_INITIAL_WARM_SIZE = "pool.warm.size";
 	public static final String PROPERTY_ROOT_ELEMENT_NAME = "root.element.name";
-	public static final String PROPERTY_ROOR_CLASS_NAME = "root.element.class.name";
+	public static final String PROPERTY_ROOT_CLASS_NAME = "root.element.class.name";
+	public static final String PROPERTY_DEBUG = "debug";
 	public static final String JSON_RESOURCEMAPPING_INCLUDE_PATTERN = "json.resourcemapping.include.pattern";
 	public static final String JSON_RESOURCEMAPPING_EXCLUDE_PATTERN = "json.resourcemapping.exclude.pattern";
 
@@ -177,11 +184,15 @@ public class ReactScriptEngineFactory extends AbstractScriptEngineFactory {
 		scriptResources = PropertiesUtil.toStringArray(context.getProperties().get(PROPERTY_SCRIPTS_PATHS),
 				new String[0]);
 		int poolTotalSize = PropertiesUtil.toInteger(context.getProperties().get(PROPERTY_POOL_TOTAL_SIZE), 20);
-		int initialWarmEngineCount = PropertiesUtil.toInteger(context.getProperties().get(PROPERTY_POOL_INITIAL_WARM_SIZE), 20);
+		int maxIdle = PropertiesUtil.toInteger(context.getProperties().get(PROPERTY_POOL_MAX_IDLE), poolTotalSize);
+		int minIdle = PropertiesUtil.toInteger(context.getProperties().get(PROPERTY_POOL_MIN_IDLE), poolTotalSize / 3);
+		int initialWarmEngineCount = PropertiesUtil.toInteger(context.getProperties().get(PROPERTY_POOL_INITIAL_WARM_SIZE), poolTotalSize);
+
+		boolean isDebug = PropertiesUtil.toBoolean(context.getProperties().get(PROPERTY_DEBUG), false);
 
 		String rootElementName = PropertiesUtil.toString(context.getProperties().get(PROPERTY_ROOT_ELEMENT_NAME),
 				"div");
-		String rootElementClassName = PropertiesUtil.toString(context.getProperties().get(PROPERTY_ROOR_CLASS_NAME),
+		String rootElementClassName = PropertiesUtil.toString(context.getProperties().get(PROPERTY_ROOT_CLASS_NAME),
 				"");
 		JavacriptEnginePoolFactory javacriptEnginePoolFactory = new JavacriptEnginePoolFactory(
 				createLoader(scriptResources), null);
@@ -196,10 +207,19 @@ public class ReactScriptEngineFactory extends AbstractScriptEngineFactory {
 		if (initialWarmEngineCount > poolTotalSize) {
 			initialWarmEngineCount = poolTotalSize;
 		}
+		if (maxIdle > poolTotalSize) {
+			maxIdle = poolTotalSize;
+		}
+		if (minIdle > poolTotalSize) {
+			minIdle = poolTotalSize;
+		}
+		if (minIdle > maxIdle) {
+			minIdle = maxIdle;
+		}
 
-		ObjectPool<JavascriptEngine> pool = createPool(poolTotalSize, javacriptEnginePoolFactory);
+		ObjectPool<JavascriptEngine> pool = createPool(poolTotalSize, minIdle, maxIdle, javacriptEnginePoolFactory);
 		this.engine = new ReactScriptEngine(this, pool, finder, dynamicClassLoaderManager, rootElementName,
-				rootElementClassName, modelFactory, adapterManager, mapper, metricsService);
+				rootElementClassName, modelFactory, adapterManager, mapper, metricsService, isDebug);
 		this.createScripts();
 		this.poolWarmup(pool, initialWarmEngineCount);
 
@@ -227,12 +247,12 @@ public class ReactScriptEngineFactory extends AbstractScriptEngineFactory {
 		this.listener.deactivate();
 	}
 
-	protected ObjectPool<JavascriptEngine> createPool(int poolTotalSize,
+	protected ObjectPool<JavascriptEngine> createPool(int poolTotalSize, int minIdle, int maxIdle,
 			JavacriptEnginePoolFactory javacriptEnginePoolFactory) {
 		GenericObjectPoolConfig config = new GenericObjectPoolConfig();
 		config.setMaxTotal(poolTotalSize);
-		config.setMaxIdle(poolTotalSize);
-		config.setMinIdle(poolTotalSize / 3);
+		config.setMaxIdle(maxIdle);
+		config.setMinIdle(minIdle);
 		return new GenericObjectPool<JavascriptEngine>(javacriptEnginePoolFactory, config);
 	}
 
